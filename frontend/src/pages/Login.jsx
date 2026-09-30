@@ -17,7 +17,7 @@ export default function Login() {
     event.preventDefault();
     setLoading(true);
     try {
-      const { data } = await loginRequest(form);
+      const { data } = await loginRequest({ ...form, email: form.email.trim().toLowerCase() });
       setAuth(data);
       navigate("/", { replace: true });
     } catch (error) {

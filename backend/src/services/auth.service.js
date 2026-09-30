@@ -5,6 +5,7 @@ import RefreshToken from "../models/RefreshToken.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateTokens.js";
 
 const hashToken = (token) => crypto.createHash("sha256").update(token).digest("hex");
+const normalizeEmail = (email = "") => email.trim().toLowerCase();
 
 const expiresInDays = () => {
   const value = process.env.REFRESH_TOKEN_EXPIRES_IN || "7d";
@@ -26,20 +27,21 @@ export const issueTokens = async (user) => {
 };
 
 export const registerUser = async (payload) => {
-  const existing = await User.findOne({ email: payload.email });
+  const email = normalizeEmail(payload.email);
+  const existing = await User.findOne({ email });
   if (existing) {
     const error = new Error("El email ya está registrado.");
     error.statusCode = 409;
     throw error;
   }
 
-  const user = await User.create(payload);
+  const user = await User.create({ ...payload, email });
   const tokens = await issueTokens(user);
   return { user, tokens };
 };
 
 export const loginUser = async ({ email, password }) => {
-  const user = await User.findOne({ email }).select("+password");
+  const user = await User.findOne({ email: normalizeEmail(email) }).select("+password");
   if (!user || !(await user.comparePassword(password))) {
     const error = new Error("Credenciales inválidas.");
     error.statusCode = 401;

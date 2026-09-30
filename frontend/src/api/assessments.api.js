@@ -4,6 +4,8 @@ export const listAssessments = () => api.get("/assessments");
 export const createAssessment = (payload) => api.post("/assessments", payload);
 export const getAssessment = (id) => api.get(`/assessments/${id}`);
 export const updateAssessment = (id, payload) => api.patch(`/assessments/${id}`, payload);
+export const deleteAssessment = (id, { cascade = false } = {}) =>
+  api.delete(`/assessments/${id}`, { params: cascade ? { cascade: true } : undefined });
 export const uploadAssessmentEvidence = (id, formData) => api.post(`/assessments/${id}/evidences`, formData, {
   headers: { "Content-Type": "multipart/form-data" }
 });

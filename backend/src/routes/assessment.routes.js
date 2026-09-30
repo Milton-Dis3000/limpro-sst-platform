@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   createAssessment,
+  deleteAssessment,
   getAssessment,
   getPublicAssessment,
   listAssessments,
@@ -21,6 +22,7 @@ router.get("/", listAssessments);
 router.post("/", createAssessment);
 router.get("/:id", getAssessment);
 router.patch("/:id", updateAssessment);
+router.delete("/:id", deleteAssessment);
 router.post("/:id/evidences", upload.single("file"), uploadAssessmentEvidence);
 router.post("/:id/recalculate", recalculateAssessment);
 

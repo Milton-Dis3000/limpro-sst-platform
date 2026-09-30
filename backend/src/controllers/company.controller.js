@@ -1,6 +1,12 @@
 import Company from "../models/Company.js";
+import Assessment from "../models/Assessment.js";
+import Response from "../models/Response.js";
+import Report from "../models/Report.js";
 import { slugify } from "../utils/slug.js";
 import { uploadImageBuffer } from "../services/cloudinary.service.js";
+
+const companyAccessFilter = (req) =>
+  req.user.rol === "admin" ? { _id: req.params.id } : { _id: req.params.id, propietario: req.user._id };
 
 export const listCompanies = async (req, res, next) => {
   try {
@@ -45,6 +51,55 @@ export const updateCompany = async (req, res, next) => {
   try {
     const company = await Company.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json(company);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteCompany = async (req, res, next) => {
+  try {
+    const company = await Company.findOne(companyAccessFilter(req));
+    if (!company) {
+      const error = new Error("Empresa no encontrada o no tienes permiso para eliminarla.");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const assessmentIds = await Assessment.find({ empresa: company._id }).distinct("_id");
+    const [responseCount, reportCount] = assessmentIds.length
+      ? await Promise.all([
+          Response.countDocuments({ evaluacion: { $in: assessmentIds } }),
+          Report.countDocuments({ evaluacion: { $in: assessmentIds } })
+        ])
+      : [0, 0];
+
+    if (assessmentIds.length > 0 && req.query.cascade !== "true") {
+      return res.status(409).json({
+        message: "La empresa tiene informacion asociada. Confirma la eliminacion completa para continuar.",
+        requiresConfirmation: true,
+        affected: {
+          assessments: assessmentIds.length,
+          responses: responseCount,
+          reports: reportCount
+        }
+      });
+    }
+
+    const session = await Company.startSession();
+    try {
+      await session.withTransaction(async () => {
+        if (assessmentIds.length) {
+          await Report.deleteMany({ evaluacion: { $in: assessmentIds } }, { session });
+          await Response.deleteMany({ evaluacion: { $in: assessmentIds } }, { session });
+          await Assessment.deleteMany({ _id: { $in: assessmentIds } }, { session });
+        }
+        await Company.deleteOne({ _id: company._id }, { session });
+      });
+    } finally {
+      await session.endSession();
+    }
+
+    res.status(204).send();
   } catch (error) {
     next(error);
   }

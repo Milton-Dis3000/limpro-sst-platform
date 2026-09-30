@@ -1,6 +1,7 @@
 import Assessment from "../models/Assessment.js";
 import Questionnaire from "../models/Questionnaire.js";
 import Response from "../models/Response.js";
+import Report from "../models/Report.js";
 import { resolveQuestionnaireSource } from "../data/resolveQuestionnaire.js";
 import { aggregateResults, scoreResponse, tabulateResponses } from "../services/scoring.service.js";
 import { uploadFileBuffer } from "../services/cloudinary.service.js";
@@ -33,19 +34,25 @@ export const listAssessments = async (req, res, next) => {
 
 export const createAssessment = async (req, res, next) => {
   try {
-    const questionnaire =
-      req.body.questionnaire ||
-      (await Questionnaire.findOne({ modulo: req.body.tipo || "psicosocial", activo: true }).select("_id"));
+    const modulo = req.body.tipo || "psicosocial";
+    const pais = req.body.pais?.trim() || "Ecuador";
+    const questionnaireFilter = { modulo, pais, activo: true };
+
+    if (req.body.questionnaire) questionnaireFilter._id = req.body.questionnaire;
+
+    const questionnaire = await Questionnaire.findOne(questionnaireFilter).select("_id");
 
     if (!questionnaire) {
-      const error = new Error("No hay cuestionario activo para este módulo.");
+      const error = new Error(`No hay un instrumento activo para ${modulo} en ${pais}.`);
       error.statusCode = 400;
       throw error;
     }
 
     const assessment = await Assessment.create({
       ...req.body,
-      questionnaire: questionnaire._id || questionnaire,
+      tipo: modulo,
+      pais,
+      questionnaire: questionnaire._id,
       evaluador: req.user._id,
       estado: req.body.estado || ASSESSMENT_STATUS.DRAFT
     });
@@ -81,6 +88,49 @@ export const updateAssessment = async (req, res, next) => {
       .populate("questionnaire")
       .populate("evaluador", "nombre email");
     res.json(assessment);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteAssessment = async (req, res, next) => {
+  try {
+    const accessFilter =
+      req.user.rol === "admin"
+        ? { _id: req.params.id }
+        : { _id: req.params.id, evaluador: req.user._id };
+    const assessment = await Assessment.findOne(accessFilter);
+    if (!assessment) {
+      const error = new Error("Evaluacion no encontrada o no tienes permiso para eliminarla.");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const [responseCount, reportCount] = await Promise.all([
+      Response.countDocuments({ evaluacion: assessment._id }),
+      Report.countDocuments({ evaluacion: assessment._id })
+    ]);
+
+    if (req.query.cascade !== "true") {
+      return res.status(409).json({
+        message: "Confirma la eliminacion permanente de la evaluacion y sus registros asociados.",
+        requiresConfirmation: true,
+        affected: { responses: responseCount, reports: reportCount }
+      });
+    }
+
+    const session = await Assessment.startSession();
+    try {
+      await session.withTransaction(async () => {
+        await Report.deleteMany({ evaluacion: assessment._id }, { session });
+        await Response.deleteMany({ evaluacion: assessment._id }, { session });
+        await Assessment.deleteOne({ _id: assessment._id }, { session });
+      });
+    } finally {
+      await session.endSession();
+    }
+
+    res.status(204).send();
   } catch (error) {
     next(error);
   }

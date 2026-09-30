@@ -4,13 +4,14 @@ import toast from "react-hot-toast";
 import Button from "../components/ui/Button.jsx";
 import Card from "../components/ui/Card.jsx";
 import { getPublicAssessment, submitPublicResponse } from "../api/assessments.api.js";
+import limproLogo from "../assets/limpro-logo.png";
 
 const DEFAULT_INSTRUCTIONS = [
   "El cuestionario es anonimo es decir no se solicita informacion personal sobre el participante.",
   "La informacion obtenida es confidencial es decir que se ha de guardar, mantener y emplear con estricta cautela la informacion obtenida.",
   "Completar todo el cuestionario requiere entre 15 a 20 minutos.",
   "Antes de responder, leer detenidamente cada pregunta y opcion de respuesta. En este punto es necesario identificar y valorar todos aquellos factores del ambito psicosocial que pueden representar un riesgo para la salud y el bienestar laboral.",
-  "Utilizar lapiz o esfero para marcar con una X la respuesta que considere que describe mejor su situacion. Es obligatorio contestar todos los items del cuestionario, en caso de error en la respuesta encerrar en un circulo la misma y seleccionar nuevamente la respuesta.",
+  "Marcar con una X la respuesta que considere que describe mejor su situacion. Es obligatorio contestar todos los items del cuestionario; si necesita corregir una respuesta, seleccione nuevamente la opcion correspondiente.",
   "No existen respuestas correctas o incorrectas.",
   "Evitar distracciones mientras completa el cuestionario, en caso de inquietud, solicitar asistencia al facilitador.",
   "El cuestionario tiene una seccion denominada observaciones y comentarios, que puede ser utilizada por los participantes en caso de sugerencias u opiniones.",
@@ -138,10 +139,15 @@ export default function QuestionnaireFill() {
     <main className="min-h-screen bg-[#EDEDED] p-3 text-[#111827] lg:p-8">
       <form onSubmit={submit} className="mx-auto grid max-w-6xl gap-5">
         <section className="overflow-hidden rounded-md border-2 border-[#1F4E79] bg-white">
-          <div className="grid items-center gap-4 border-b border-zinc-300 p-5 text-center sm:grid-cols-[1fr_auto_1fr]">
-            <div className="text-2xl font-black leading-tight text-[#2B2E63]">Ministerio<br />del Trabajo</div>
-            <div className="mx-auto grid size-20 place-items-center rounded-full border-4 border-[#D9A441] text-xs font-black text-[#1F4E79]">EC</div>
-            <div className="text-2xl font-light leading-tight text-zinc-500">Republica<br />del Ecuador</div>
+          <div className="flex flex-wrap items-center justify-between gap-5 border-b border-zinc-300 p-5">
+            <img src={limproLogo} alt="LIMPRO" className="h-11 w-auto" />
+            <div className="text-center sm:text-right">
+              <p className="text-lg font-black text-[#1F4E79]">Evaluaciones SST</p>
+              <p className="text-sm text-zinc-500">Seguridad, salud y bienestar laboral</p>
+            </div>
+            {assessment.empresa?.logo?.url && (
+              <img src={assessment.empresa.logo.url} alt={`Logo de ${assessment.empresa.nombreComercial}`} className="max-h-12 max-w-40 object-contain" />
+            )}
           </div>
           <div className="border-b border-zinc-300 px-4 py-3 text-center">
             <p className="text-lg font-black uppercase">Cuestionario de evaluacion psicosocial en espacios laborales</p>

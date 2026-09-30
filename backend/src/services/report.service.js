@@ -955,7 +955,27 @@ const drawPdfKeyValueTable = (doc, rows = []) => {
   doc.y = y + 12;
 };
 
-const drawPdfDossier = (doc, assessment) => {
+const loadPdfEvidenceImages = async (evidences = []) =>
+  Promise.all(
+    evidences.map(async (evidence) => {
+      const url = evidence.archivo?.url;
+      const mimeType = evidence.archivo?.mimeType?.toLowerCase();
+      const supportedImage = ["image/jpeg", "image/jpg", "image/png"].includes(mimeType);
+      if (!url || !supportedImage) return null;
+
+      try {
+        const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
+        if (!response.ok) return null;
+        const contentLength = Number(response.headers.get("content-length") || 0);
+        if (contentLength > 8 * 1024 * 1024) return null;
+        return Buffer.from(await response.arrayBuffer());
+      } catch {
+        return null;
+      }
+    })
+  );
+
+const drawPdfDossier = (doc, assessment, evidenceImages = []) => {
   const dossier = assessment.expediente || {};
   const socialization = dossier.socializacion || {};
   const evidences = dossier.evidencias || [];
@@ -1004,10 +1024,11 @@ const drawPdfDossier = (doc, assessment) => {
   });
   y += 24;
 
-  evidences.forEach((evidence) => {
+  evidences.forEach((evidence, evidenceIndex) => {
     const evidenceUrl = evidence.archivo?.url || "";
+    const evidenceImage = evidenceImages[evidenceIndex];
     const description = evidence.descripcion || evidence.archivo?.originalName || "";
-    const rowHeight = Math.max(36, Math.ceil(String(description).length / 56) * 12 + 18);
+    const rowHeight = Math.max(evidenceImage ? 70 : 36, Math.ceil(String(description).length / 56) * 12 + 18);
     if (y + rowHeight > doc.page.height - doc.page.margins.bottom) {
       doc.addPage();
       y = doc.y;
@@ -1018,13 +1039,27 @@ const drawPdfDossier = (doc, assessment) => {
       evidence.nombre || evidence.archivo?.originalName || "",
       evidence.fecha ? new Date(evidence.fecha).toLocaleDateString("es-EC") : "",
       description,
-      evidenceUrl ? "Abrir evidencia" : "Sin enlace"
+      evidenceImage ? "" : evidenceUrl ? "Abrir evidencia" : "Sin enlace"
     ].forEach((value, index) => {
       drawPdfCell(doc, value, cursorX, y, widths[index], rowHeight, {
         fontSize: 6.8,
         color: index === 4 && evidenceUrl ? "#1D4ED8" : "#111827",
         align: index === 4 ? "center" : "left"
       });
+      if (index === 4 && evidenceImage) {
+        try {
+          doc.image(evidenceImage, cursorX + 6, y + 6, {
+            fit: [widths[index] - 12, rowHeight - 12],
+            align: "center",
+            valign: "center"
+          });
+        } catch {
+          doc.font("Helvetica").fontSize(6.8).fillColor("#1D4ED8").text("Abrir evidencia", cursorX + 4, y + 12, {
+            width: widths[index] - 8,
+            align: "center"
+          });
+        }
+      }
       if (index === 4 && evidenceUrl) {
         doc.link(cursorX + 4, y + 5, widths[index] - 8, rowHeight - 10, evidenceUrl);
       }
@@ -1037,8 +1072,8 @@ const drawPdfDossier = (doc, assessment) => {
 
 const drawSignatureBlock = (doc, assessment, evaluatorProfile, includeSignature) => {
   if (!includeSignature || assessment.informeTecnico?.incluirFirma === false) return;
-  ensurePdfSpace(doc, 150);
-  doc.moveDown(1);
+  ensurePdfSpace(doc, 90);
+  doc.moveDown(0.25);
   const name = evaluatorProfile?.nombreProfesional || assessment.evaluador?.nombre || "Profesional evaluador";
   const role = evaluatorProfile?.cargo || "Responsable de la evaluacion";
   const registry = evaluatorProfile?.registroProfesional || "Registro profesional no especificado";
@@ -1047,8 +1082,7 @@ const drawSignatureBlock = (doc, assessment, evaluatorProfile, includeSignature)
   const lineWidth = 240;
   const lineX = x + (width - lineWidth) / 2;
 
-  doc.moveDown(1.5);
-  const signatureY = doc.y + 28;
+  const signatureY = doc.y + 12;
   doc.moveTo(lineX, signatureY).lineTo(lineX + lineWidth, signatureY).stroke("#111827");
   doc.font("Helvetica-Bold").fontSize(10).fillColor("#111827").text(name, x, signatureY + 10, { width, align: "center" });
   doc.font("Helvetica").fontSize(9).text(role, { width, align: "center" });
@@ -1056,8 +1090,10 @@ const drawSignatureBlock = (doc, assessment, evaluatorProfile, includeSignature)
   if (evaluatorProfile?.contacto?.email) doc.text(`Contacto: ${evaluatorProfile.contacto.email}`, { width, align: "center" });
 };
 
-export const buildAssessmentPdf = async ({ assessment, responses, questionnaire, evaluatorProfile, includeSignature = true }) =>
-  new Promise((resolve) => {
+export const buildAssessmentPdf = async ({ assessment, responses, questionnaire, evaluatorProfile, includeSignature = true }) => {
+  const evidenceImages = await loadPdfEvidenceImages(assessment.expediente?.evidencias || []);
+
+  return new Promise((resolve) => {
     const chunks = [];
     const doc = new PDFDocument({ margin: 48, size: "A4" });
     const results = buildCurrentResults({ questionnaire, assessment, responses });
@@ -1124,7 +1160,7 @@ export const buildAssessmentPdf = async ({ assessment, responses, questionnaire,
     }
 
     drawPdfActionPlan(doc, results.planAccion || []);
-    drawPdfDossier(doc, assessment);
+    drawPdfDossier(doc, assessment, evidenceImages);
 
     doc.moveDown();
     doc.fontSize(9).fillColor("#6B7280").text(
@@ -1136,6 +1172,7 @@ export const buildAssessmentPdf = async ({ assessment, responses, questionnaire,
     drawSignatureBlock(doc, assessment, evaluatorProfile, includeSignature);
     doc.end();
   });
+};
 
 const addQuestionnaireSheet = (workbook, questionnaire) => {
   const ws = workbook.addWorksheet("Cuestionario");

@@ -9,7 +9,7 @@ const assessmentSchema = new mongoose.Schema(
     questionnaire: { type: mongoose.Schema.Types.ObjectId, ref: "Questionnaire", required: true },
     tipo: {
       type: String,
-      enum: ["psicosocial", "ruido", "iluminacion", "riesgos_fisicos", "ergonomia"],
+      enum: ["psicosocial", "ruido", "iluminacion", "riesgos_fisicos", "ergonomia", "prevencion_alcohol_drogas"],
       default: "psicosocial"
     },
     pais: { type: String, default: "Ecuador" },

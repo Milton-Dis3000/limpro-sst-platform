@@ -1,12 +1,43 @@
-import { ClipboardList, Copy, Plus, RefreshCw } from "lucide-react";
+import { ClipboardList, Copy, Plus, RefreshCw, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { createAssessment, listAssessments } from "../api/assessments.api.js";
+import { createAssessment, deleteAssessment, listAssessments } from "../api/assessments.api.js";
 import { listCompanies } from "../api/companies.api.js";
 import Button from "../components/ui/Button.jsx";
 import Card from "../components/ui/Card.jsx";
-import Input from "../components/ui/Input.jsx";
 import RiskBadge from "../components/ui/RiskBadge.jsx";
+
+const assessmentTypeLabels = {
+  psicosocial: "Psicosocial",
+  ruido: "Ruido",
+  iluminacion: "Iluminacion",
+  ergonomia: "Ergonomia",
+  prevencion_alcohol_drogas: "Prevencion del uso y consumo de alcohol y drogas"
+};
+
+const countries = [
+  "Argentina",
+  "Bolivia",
+  "Brasil",
+  "Chile",
+  "Colombia",
+  "Costa Rica",
+  "Cuba",
+  "Ecuador",
+  "El Salvador",
+  "Estados Unidos",
+  "Guatemala",
+  "Haiti",
+  "Honduras",
+  "Mexico",
+  "Nicaragua",
+  "Panama",
+  "Paraguay",
+  "Peru",
+  "Republica Dominicana",
+  "Uruguay",
+  "Venezuela"
+];
 
 const resolveGlobalRisk = (assessment) => {
   const global = assessment.resultadosCalculados?.global;
@@ -24,6 +55,7 @@ const resolveGlobalRisk = (assessment) => {
 export default function Assessments() {
   const [assessments, setAssessments] = useState([]);
   const [companies, setCompanies] = useState([]);
+  const [deletingId, setDeletingId] = useState("");
   const [form, setForm] = useState({ empresa: "", tipo: "psicosocial", pais: "Ecuador" });
 
   const load = async () => {
@@ -56,6 +88,41 @@ export default function Assessments() {
     toast.success("Enlace copiado.");
   };
 
+  const removeAssessment = async (assessment) => {
+    const companyName = assessment.empresa?.nombreComercial || "Sin empresa";
+    const firstConfirmation = window.confirm(
+      `¿Eliminar la evaluacion ${assessmentTypeLabels[assessment.tipo] || assessment.tipo} de "${companyName}"?`
+    );
+    if (!firstConfirmation) return;
+
+    setDeletingId(assessment._id);
+    try {
+      await deleteAssessment(assessment._id);
+    } catch (error) {
+      const data = error.response?.data;
+      if (error.response?.status !== 409 || !data?.requiresConfirmation) {
+        toast.error(data?.message || "No se pudo eliminar la evaluacion.");
+        return;
+      }
+
+      const affected = data.affected || {};
+      const secondConfirmation = window.confirm(
+        `ADVERTENCIA FINAL: se eliminaran permanentemente la evaluacion, ${affected.responses || 0} respuesta(s) y ${affected.reports || 0} reporte(s). Esta accion no se puede deshacer. ¿Deseas continuar?`
+      );
+      if (!secondConfirmation) return;
+
+      try {
+        await deleteAssessment(assessment._id, { cascade: true });
+        setAssessments((current) => current.filter((item) => item._id !== assessment._id));
+        toast.success("Evaluacion y registros asociados eliminados.");
+      } catch (cascadeError) {
+        toast.error(cascadeError.response?.data?.message || "No se pudo completar la eliminacion.");
+      }
+    } finally {
+      setDeletingId("");
+    }
+  };
+
   return (
     <div className="grid gap-6">
       <section className="grid gap-4">
@@ -80,21 +147,33 @@ export default function Assessments() {
                   <th>Estado</th>
                   <th>Participantes</th>
                   <th>Riesgo global</th>
-                  <th>Enlace</th>
+                  <th className="px-5 text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
                 {assessments.map((assessment) => (
                   <tr key={assessment._id} className="hover:bg-zinc-50">
                     <td className="px-5 py-4 font-bold">{assessment.empresa?.nombreComercial || "Sin empresa"}</td>
-                    <td>{assessment.tipo}</td>
+                    <td>{assessmentTypeLabels[assessment.tipo] || assessment.tipo}</td>
                     <td>{assessment.estado}</td>
                     <td>{assessment.totalParticipantes}</td>
                     <td><RiskBadge risk={resolveGlobalRisk(assessment)} /></td>
-                    <td>
-                      <button title="Copiar enlace" onClick={() => copyLink(assessment.publicToken)} className="grid h-11 w-11 place-items-center rounded-lg border border-zinc-200 text-[#5A5A5A] hover:border-[#F97316] hover:bg-orange-50 hover:text-[#C2410C]">
-                        <Copy size={22} />
-                      </button>
+                    <td className="px-5">
+                      <div className="flex justify-center gap-2">
+                        <button title="Copiar enlace" onClick={() => copyLink(assessment.publicToken)} className="grid h-11 w-11 place-items-center rounded-lg border border-zinc-200 text-[#5A5A5A] hover:border-[#F97316] hover:bg-orange-50 hover:text-[#C2410C]">
+                          <Copy size={22} />
+                        </button>
+                        <button
+                          type="button"
+                          title="Eliminar evaluacion"
+                          aria-label={`Eliminar evaluacion de ${assessment.empresa?.nombreComercial || "empresa"}`}
+                          disabled={deletingId === assessment._id}
+                          onClick={() => removeAssessment(assessment)}
+                          className="grid h-11 w-11 place-items-center rounded-lg border border-red-200 text-red-600 hover:bg-red-50 disabled:cursor-wait disabled:opacity-50"
+                        >
+                          <Trash2 size={20} />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -131,7 +210,12 @@ export default function Assessments() {
             </select>
             {!companies.length && <span className="text-xs font-normal text-[#C2410C]">Primero registra una empresa o actualiza esta lista.</span>}
           </label>
-          <Input label="Pais" value={form.pais} onChange={(e) => setForm({ ...form, pais: e.target.value })} />
+          <label className="grid gap-1.5 text-sm font-bold">
+            Pais
+            <select className="h-12 rounded-lg border border-zinc-200 bg-white px-4" value={form.pais} onChange={(e) => setForm({ ...form, pais: e.target.value })} required>
+              {countries.map((country) => <option key={country} value={country}>{country}</option>)}
+            </select>
+          </label>
           <label className="grid gap-1.5 text-sm font-bold">
             Tipo
             <select className="h-12 rounded-lg border border-zinc-200 bg-white px-4" value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}>
@@ -139,6 +223,7 @@ export default function Assessments() {
               <option value="ruido">Ruido</option>
               <option value="iluminacion">Iluminacion</option>
               <option value="ergonomia">Ergonomia</option>
+              <option value="prevencion_alcohol_drogas">Prevencion del uso y consumo de alcohol y drogas</option>
             </select>
           </label>
           <Button className="md:col-span-3"><Plus /> Crear evaluacion</Button>

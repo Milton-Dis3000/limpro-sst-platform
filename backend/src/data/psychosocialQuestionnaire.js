@@ -13,7 +13,7 @@ export const psychosocialQuestionnaire = {
     "La información obtenida es confidencial es decir que se ha de guardar, mantener y emplear con estricta cautela la información obtenida.",
     "Completar todo el cuestionario requiere entre 15 a 20 minutos.",
     "Antes de responder, leer detenidamente cada pregunta y opción de respuesta. En este punto es necesario identificar y valorar todos aquellos factores del ámbito psicosocial que pueden representar un riesgo para la salud y el bienestar laboral.",
-    "Utilizar lápiz o esfero para marcar con una “X” la respuesta que considere que describe mejor su situación. Es obligatorio contestar todos los ítems del cuestionario, en caso de error en la respuesta encerrar en un círculo la misma y seleccionar nuevamente la respuesta.",
+    "Marcar con una “X” la respuesta que considere que describe mejor su situación. Es obligatorio contestar todos los ítems del cuestionario; si necesita corregir una respuesta, seleccione nuevamente la opción correspondiente.",
     "No existen respuestas correctas o incorrectas.",
     "Evitar distracciones mientras completa el cuestionario, en caso de inquietud, solicitar asistencia al facilitador.",
     "El cuestionario tiene una sección denominada “observaciones y comentarios”, que puede ser utilizada por los participantes en caso de sugerencias u opiniones.",

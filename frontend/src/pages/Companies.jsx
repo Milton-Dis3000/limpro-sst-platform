@@ -1,13 +1,14 @@
-import { Building2, Plus, Search } from "lucide-react";
+import { Building2, Plus, Search, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { createCompany, listCompanies } from "../api/companies.api.js";
+import { createCompany, deleteCompany, listCompanies } from "../api/companies.api.js";
 import Button from "../components/ui/Button.jsx";
 import Card from "../components/ui/Card.jsx";
 import Input from "../components/ui/Input.jsx";
 
 export default function Companies() {
   const [companies, setCompanies] = useState([]);
+  const [deletingId, setDeletingId] = useState("");
   const [form, setForm] = useState({ nombreComercial: "", razonSocial: "", identificacionFiscal: "", pais: "Ecuador", ciudad: "", sector: "" });
 
   const load = async () => {
@@ -32,6 +33,41 @@ export default function Companies() {
       load();
     } catch (error) {
       toast.error(error.response?.data?.message || "No se pudo registrar la empresa.");
+    }
+  };
+
+  const removeCompany = async (company) => {
+    const confirmed = window.confirm(
+      `¿Eliminar permanentemente la empresa "${company.nombreComercial}"? Esta accion no se puede deshacer.`
+    );
+    if (!confirmed) return;
+
+    setDeletingId(company._id);
+    try {
+      await deleteCompany(company._id);
+      setCompanies((current) => current.filter((item) => item._id !== company._id));
+      toast.success("Empresa eliminada.");
+    } catch (error) {
+      const data = error.response?.data;
+      if (error.response?.status === 409 && data?.requiresConfirmation) {
+        const affected = data.affected || {};
+        const cascadeConfirmed = window.confirm(
+          `ADVERTENCIA: tambien se eliminaran permanentemente ${affected.assessments || 0} evaluacion(es), ${affected.responses || 0} respuesta(s) y ${affected.reports || 0} reporte(s) de "${company.nombreComercial}". ¿Deseas continuar?`
+        );
+        if (!cascadeConfirmed) return;
+
+        try {
+          await deleteCompany(company._id, { cascade: true });
+          setCompanies((current) => current.filter((item) => item._id !== company._id));
+          toast.success("Empresa y registros asociados eliminados.");
+        } catch (cascadeError) {
+          toast.error(cascadeError.response?.data?.message || "No se pudo completar la eliminacion.");
+        }
+      } else {
+        toast.error(data?.message || "No se pudo eliminar la empresa.");
+      }
+    } finally {
+      setDeletingId("");
     }
   };
 
@@ -65,6 +101,7 @@ export default function Companies() {
                   <th>RUC/NIT</th>
                   <th>Ciudad</th>
                   <th>Sector</th>
+                  <th className="px-5 text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
@@ -75,11 +112,23 @@ export default function Companies() {
                     <td>{company.identificacionFiscal}</td>
                     <td>{company.ciudad}</td>
                     <td>{company.sector}</td>
+                    <td className="px-5 text-center">
+                      <button
+                        type="button"
+                        title="Eliminar empresa"
+                        aria-label={`Eliminar ${company.nombreComercial}`}
+                        disabled={deletingId === company._id}
+                        onClick={() => removeCompany(company)}
+                        className="mx-auto grid h-10 w-10 place-items-center rounded-lg border border-red-200 text-red-600 transition hover:bg-red-50 disabled:cursor-wait disabled:opacity-50"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </td>
                   </tr>
                 ))}
                 {!companies.length && (
                   <tr>
-                    <td colSpan="5" className="py-10 text-center text-[#5A5A5A]">Aun no hay empresas registradas.</td>
+                    <td colSpan="6" className="py-10 text-center text-[#5A5A5A]">Aun no hay empresas registradas.</td>
                   </tr>
                 )}
               </tbody>
