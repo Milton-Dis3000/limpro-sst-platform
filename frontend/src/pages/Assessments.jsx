@@ -6,6 +6,7 @@ import { listCompanies } from "../api/companies.api.js";
 import Button from "../components/ui/Button.jsx";
 import Card from "../components/ui/Card.jsx";
 import RiskBadge from "../components/ui/RiskBadge.jsx";
+import { COUNTRIES } from "../utils/countries.js";
 
 const assessmentTypeLabels = {
   psicosocial: "Psicosocial",
@@ -14,30 +15,6 @@ const assessmentTypeLabels = {
   ergonomia: "Ergonomia",
   prevencion_alcohol_drogas: "Prevencion del uso y consumo de alcohol y drogas"
 };
-
-const countries = [
-  "Argentina",
-  "Bolivia",
-  "Brasil",
-  "Chile",
-  "Colombia",
-  "Costa Rica",
-  "Cuba",
-  "Ecuador",
-  "El Salvador",
-  "Estados Unidos",
-  "Guatemala",
-  "Haiti",
-  "Honduras",
-  "Mexico",
-  "Nicaragua",
-  "Panama",
-  "Paraguay",
-  "Peru",
-  "Republica Dominicana",
-  "Uruguay",
-  "Venezuela"
-];
 
 const resolveGlobalRisk = (assessment) => {
   const global = assessment.resultadosCalculados?.global;
@@ -213,7 +190,7 @@ export default function Assessments() {
           <label className="grid gap-1.5 text-sm font-bold">
             Pais
             <select className="h-12 rounded-lg border border-zinc-200 bg-white px-4" value={form.pais} onChange={(e) => setForm({ ...form, pais: e.target.value })} required>
-              {countries.map((country) => <option key={country} value={country}>{country}</option>)}
+              {COUNTRIES.map((country) => <option key={country} value={country}>{country}</option>)}
             </select>
           </label>
           <label className="grid gap-1.5 text-sm font-bold">

@@ -1,0 +1,23 @@
+export const COUNTRIES = [
+  "Argentina",
+  "Bolivia",
+  "Brasil",
+  "Chile",
+  "Colombia",
+  "Costa Rica",
+  "Cuba",
+  "Ecuador",
+  "El Salvador",
+  "Estados Unidos",
+  "Guatemala",
+  "Haiti",
+  "Honduras",
+  "Mexico",
+  "Nicaragua",
+  "Panama",
+  "Paraguay",
+  "Peru",
+  "Republica Dominicana",
+  "Uruguay",
+  "Venezuela"
+];

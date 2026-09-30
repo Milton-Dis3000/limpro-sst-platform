@@ -5,6 +5,7 @@ import { createCompany, deleteCompany, listCompanies } from "../api/companies.ap
 import Button from "../components/ui/Button.jsx";
 import Card from "../components/ui/Card.jsx";
 import Input from "../components/ui/Input.jsx";
+import { COUNTRIES } from "../utils/countries.js";
 
 export default function Companies() {
   const [companies, setCompanies] = useState([]);
@@ -151,7 +152,17 @@ export default function Companies() {
           <Input label="Nombre comercial" value={form.nombreComercial} onChange={(e) => setForm({ ...form, nombreComercial: e.target.value })} required />
           <Input label="Razon social" value={form.razonSocial} onChange={(e) => setForm({ ...form, razonSocial: e.target.value })} required />
           <Input label="RUC/NIT" value={form.identificacionFiscal} onChange={(e) => setForm({ ...form, identificacionFiscal: e.target.value })} required />
-          <Input label="Pais" value={form.pais} onChange={(e) => setForm({ ...form, pais: e.target.value })} required />
+          <label className="grid gap-1.5 text-sm font-bold">
+            Pais
+            <select
+              className="h-12 rounded-lg border border-zinc-200 bg-white px-4"
+              value={form.pais}
+              onChange={(e) => setForm({ ...form, pais: e.target.value })}
+              required
+            >
+              {COUNTRIES.map((country) => <option key={country} value={country}>{country}</option>)}
+            </select>
+          </label>
           <Input label="Ciudad" value={form.ciudad} onChange={(e) => setForm({ ...form, ciudad: e.target.value })} required />
           <Input label="Sector" value={form.sector} onChange={(e) => setForm({ ...form, sector: e.target.value })} />
           <Button className="md:col-span-2"><Plus /> Guardar empresa</Button>
