@@ -115,7 +115,22 @@ export default function Assessments() {
               <h3 className="text-lg font-black">Evaluaciones registradas</h3>
             </div>
           </div>
-          <div className="overflow-x-auto">
+          <div className="grid gap-3 p-3 md:hidden">
+            {assessments.map((assessment) => (
+              <article key={assessment._id} className="grid gap-3 rounded-lg border border-zinc-200 p-3 text-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0"><h4 className="break-words font-bold">{assessment.empresa?.nombreComercial || "Sin empresa"}</h4><p className="mt-1 break-words text-xs text-zinc-600">{assessmentTypeLabels[assessment.tipo] || assessment.tipo}</p></div>
+                  <RiskBadge risk={resolveGlobalRisk(assessment)} />
+                </div>
+                <div className="flex items-center justify-between border-t border-zinc-200 pt-2 text-xs text-zinc-600"><span>{assessment.estado} · {assessment.totalParticipantes} participantes</span><div className="flex gap-2">
+                  <button title="Copiar enlace" onClick={() => copyLink(assessment.publicToken)} className="grid size-10 place-items-center rounded-lg border border-zinc-200"><Copy size={18} /></button>
+                  <button type="button" title="Eliminar evaluación" aria-label="Eliminar evaluación" disabled={deletingId === assessment._id} onClick={() => removeAssessment(assessment)} className="grid size-10 place-items-center rounded-lg border border-red-200 text-red-600"><Trash2 size={18} /></button>
+                </div></div>
+              </article>
+            ))}
+            {!assessments.length && <p className="py-6 text-center text-sm text-zinc-500">Aun no hay evaluaciones.</p>}
+          </div>
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[850px] text-left text-sm">
               <thead className="bg-zinc-50 text-xs uppercase text-[#5A5A5A]">
                 <tr>
@@ -178,7 +193,7 @@ export default function Assessments() {
             <RefreshCw size={22} />
           </button>
         </div>
-        <form onSubmit={submit} className="grid gap-4 md:grid-cols-3">
+        <form onSubmit={submit} className="grid min-w-0 gap-4 md:grid-cols-3">
           <label className="grid gap-1.5 text-sm font-bold">
             Empresa
             <select className="h-12 rounded-lg border border-zinc-200 bg-white px-4" value={form.empresa} onChange={(e) => setForm({ ...form, empresa: e.target.value })} required>

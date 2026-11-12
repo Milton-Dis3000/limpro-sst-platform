@@ -93,7 +93,24 @@ export default function Companies() {
               <h3 className="text-lg font-black">Directorio de empresas</h3>
             </div>
           </div>
-          <div className="overflow-x-auto">
+          <div className="grid gap-3 p-3 md:hidden">
+            {companies.map((company) => (
+              <article key={company._id} className="grid min-w-0 gap-2 rounded-lg border border-zinc-200 p-3 text-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <h4 className="min-w-0 break-words font-bold">{company.nombreComercial}</h4>
+                  <button type="button" title="Eliminar empresa" aria-label={`Eliminar ${company.nombreComercial}`} disabled={deletingId === company._id} onClick={() => removeCompany(company)} className="grid size-10 shrink-0 place-items-center rounded-lg border border-red-200 text-red-600"><Trash2 size={18} /></button>
+                </div>
+                <p className="break-words text-zinc-600">{company.razonSocial}</p>
+                <div className="grid grid-cols-2 gap-2 text-xs text-zinc-600">
+                  <span>RUC/NIT<br /><b className="break-all text-zinc-900">{company.identificacionFiscal}</b></span>
+                  <span>Ciudad<br /><b className="break-words text-zinc-900">{company.ciudad}</b></span>
+                  <span className="col-span-2">Sector<br /><b className="break-words text-zinc-900">{company.sector || "Sin especificar"}</b></span>
+                </div>
+              </article>
+            ))}
+            {!companies.length && <p className="py-6 text-center text-sm text-zinc-500">Aun no hay empresas registradas.</p>}
+          </div>
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[760px] text-left text-sm">
               <thead className="bg-zinc-50 text-xs uppercase text-[#5A5A5A]">
                 <tr>
@@ -148,7 +165,7 @@ export default function Companies() {
             <p className="text-sm text-[#5A5A5A]">Datos base del cliente.</p>
           </div>
         </div>
-        <form onSubmit={submit} className="grid gap-4 md:grid-cols-2">
+        <form onSubmit={submit} className="grid min-w-0 gap-4 md:grid-cols-2">
           <Input label="Nombre comercial" value={form.nombreComercial} onChange={(e) => setForm({ ...form, nombreComercial: e.target.value })} required />
           <Input label="Razon social" value={form.razonSocial} onChange={(e) => setForm({ ...form, razonSocial: e.target.value })} required />
           <Input label="RUC/NIT" value={form.identificacionFiscal} onChange={(e) => setForm({ ...form, identificacionFiscal: e.target.value })} required />

@@ -77,7 +77,7 @@ export default function AppLayout() {
         </div>
       </aside>
 
-      <main className="lg:pl-64">
+      <main className="min-w-0 pb-20 lg:pb-0 lg:pl-64">
         <header className="sticky top-0 z-10 flex min-h-20 items-center justify-between border-b border-zinc-200/80 bg-white/95 px-4 backdrop-blur lg:px-8">
           <div>
             <p className="text-sm text-[#5A5A5A]">Espacio de trabajo</p>
@@ -94,10 +94,29 @@ export default function AppLayout() {
           </div>
         </header>
 
-        <div className="mx-auto max-w-[1280px] p-4 lg:p-8">
+        <div className="mx-auto min-w-0 max-w-[1280px] p-3 sm:p-4 lg:p-8">
           <Outlet />
         </div>
       </main>
+      <nav aria-label="Navegacion principal" className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-6 border-t border-zinc-200 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_16px_rgba(0,0,0,0.08)] backdrop-blur lg:hidden">
+        {nav.map((item) => {
+          const Icon = item.icon;
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === "/"}
+              aria-label={item.label}
+              className={({ isActive }) =>
+                `flex min-w-0 flex-col items-center justify-center gap-1 px-1 py-2 text-[10px] font-semibold leading-tight ${isActive ? "text-[#C2410C]" : "text-zinc-500"}`
+              }
+            >
+              <Icon size={20} strokeWidth={2.2} />
+              <span className="truncate">{item.label}</span>
+            </NavLink>
+          );
+        })}
+      </nav>
     </div>
   );
 }
