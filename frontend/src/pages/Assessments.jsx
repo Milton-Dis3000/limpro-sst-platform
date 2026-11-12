@@ -117,8 +117,8 @@ export default function Assessments() {
           </div>
           <div className="grid gap-3 p-3 md:hidden">
             {assessments.map((assessment) => (
-              <article key={assessment._id} className="grid gap-3 rounded-lg border border-zinc-200 p-3 text-sm">
-                <div className="flex items-start justify-between gap-3">
+              <article key={assessment._id} className="grid min-w-0 gap-3 overflow-hidden rounded-lg border border-zinc-200 p-3 text-sm">
+                <div className="flex min-w-0 items-start justify-between gap-3">
                   <div className="min-w-0"><h4 className="break-words font-bold">{assessment.empresa?.nombreComercial || "Sin empresa"}</h4><p className="mt-1 break-words text-xs text-zinc-600">{assessmentTypeLabels[assessment.tipo] || assessment.tipo}</p></div>
                   <RiskBadge risk={resolveGlobalRisk(assessment)} />
                 </div>
@@ -194,23 +194,23 @@ export default function Assessments() {
           </button>
         </div>
         <form onSubmit={submit} className="grid min-w-0 gap-4 md:grid-cols-3">
-          <label className="grid gap-1.5 text-sm font-bold">
+              <label className="grid min-w-0 gap-1.5 text-sm font-bold">
             Empresa
-            <select className="h-12 rounded-lg border border-zinc-200 bg-white px-4" value={form.empresa} onChange={(e) => setForm({ ...form, empresa: e.target.value })} required>
+            <select className="h-12 w-full min-w-0 rounded-lg border border-zinc-200 bg-white px-3" value={form.empresa} onChange={(e) => setForm({ ...form, empresa: e.target.value })} required>
               <option value="">Seleccionar</option>
               {companies.map((company) => <option key={company._id} value={company._id}>{company.nombreComercial}</option>)}
             </select>
             {!companies.length && <span className="text-xs font-normal text-[#C2410C]">Primero registra una empresa o actualiza esta lista.</span>}
           </label>
-          <label className="grid gap-1.5 text-sm font-bold">
+          <label className="grid min-w-0 gap-1.5 text-sm font-bold">
             Pais
-            <select className="h-12 rounded-lg border border-zinc-200 bg-white px-4" value={form.pais} onChange={(e) => setForm({ ...form, pais: e.target.value })} required>
+            <select className="h-12 w-full min-w-0 rounded-lg border border-zinc-200 bg-white px-3" value={form.pais} onChange={(e) => setForm({ ...form, pais: e.target.value })} required>
               {COUNTRIES.map((country) => <option key={country} value={country}>{country}</option>)}
             </select>
           </label>
-          <label className="grid gap-1.5 text-sm font-bold">
+          <label className="grid min-w-0 gap-1.5 text-sm font-bold">
             Tipo
-            <select className="h-12 rounded-lg border border-zinc-200 bg-white px-4" value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}>
+            <select className="h-12 w-full min-w-0 rounded-lg border border-zinc-200 bg-white px-3" value={form.tipo} onChange={(e) => setForm({ ...form, tipo: e.target.value })}>
               <option value="psicosocial">Psicosocial</option>
               <option value="ruido">Ruido</option>
               <option value="iluminacion">Iluminacion</option>
