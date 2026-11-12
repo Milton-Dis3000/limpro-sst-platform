@@ -136,11 +136,11 @@ export default function QuestionnaireFill() {
   if (!assessment) return <main className="p-6">Cargando cuestionario...</main>;
 
   return (
-    <main className="min-h-screen bg-[#EDEDED] p-3 text-[#111827] lg:p-8">
-      <form onSubmit={submit} className="mx-auto grid max-w-6xl gap-5">
+    <main className="min-h-screen bg-[#EDEDED] p-2 text-[#111827] sm:p-3 lg:p-8">
+      <form onSubmit={submit} className="mx-auto grid w-full max-w-6xl gap-3 sm:gap-5">
         <section className="overflow-hidden rounded-md border-2 border-[#1F4E79] bg-white">
-          <div className="flex flex-wrap items-center justify-between gap-5 border-b border-zinc-300 p-5">
-            <img src={limproLogo} alt="LIMPRO" className="h-11 w-auto" />
+          <div className="flex flex-col items-center justify-between gap-3 border-b border-zinc-300 p-3 sm:flex-row sm:gap-5 sm:p-5">
+            <img src={limproLogo} alt="LIMPRO" className="h-9 w-auto sm:h-11" />
             <div className="text-center sm:text-right">
               <p className="text-lg font-black text-[#1F4E79]">Evaluaciones SST</p>
               <p className="text-sm text-zinc-500">Seguridad, salud y bienestar laboral</p>
@@ -153,7 +153,7 @@ export default function QuestionnaireFill() {
             <p className="text-lg font-black uppercase">Cuestionario de evaluacion psicosocial en espacios laborales</p>
             {assessment.empresa?.nombreComercial && <p className="mt-1 text-sm text-zinc-600">{assessment.empresa.nombreComercial}</p>}
           </div>
-          <div className="px-4 py-3 text-sm leading-relaxed">
+          <div className="px-3 py-3 text-sm leading-relaxed sm:px-4">
             <p className="font-black">Instrucciones para completar el cuestionario:</p>
             <ol className="grid list-decimal gap-1 pl-5">
               {instructions.map((instruction, index) => (
@@ -206,7 +206,46 @@ export default function QuestionnaireFill() {
           <Card key={dimension} className="overflow-hidden p-0">
             <div className="bg-white">
               <div className="border-b border-zinc-200 px-4 py-3 text-center text-base font-black uppercase">{dimension}</div>
-              <div className="overflow-x-auto">
+              <div className="divide-y divide-zinc-200 md:hidden">
+                {questions.map((question) => (
+                  <fieldset key={question.order} className="grid gap-3 p-4">
+                    <legend className="text-sm font-bold leading-relaxed">
+                      <span className="mr-2 inline-grid size-7 place-items-center rounded-full bg-[#EAF2F8] text-[#1F4E79]">
+                        {question.order}
+                      </span>
+                      {question.text}
+                    </legend>
+                    <div className="grid gap-2">
+                      {answerOptions.map((option) => (
+                        <label
+                          key={option.value}
+                          className={`flex min-h-12 cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-sm leading-snug transition ${
+                            answers[question.order] === String(option.value)
+                              ? "border-[#1F4E79] bg-blue-50 text-[#153A5B]"
+                              : "border-zinc-200 bg-white"
+                          }`}
+                        >
+                          <input
+                            required
+                            type="radio"
+                            name={`q-${question.order}`}
+                            value={option.value}
+                            checked={answers[question.order] === String(option.value)}
+                            onChange={(event) => setAnswers({ ...answers, [question.order]: event.target.value })}
+                            className="size-5 shrink-0 accent-[#1F4E79]"
+                          />
+                          <span>{option.label} ({option.value})</span>
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                ))}
+                <div className="flex items-center justify-between gap-3 bg-[#1F4E79] px-4 py-3 text-sm font-bold text-white">
+                  <span>Suma de puntos de la dimension</span>
+                  <span className="shrink-0">{dimensionTotals[dimension] || 0} puntos</span>
+                </div>
+              </div>
+              <div className="hidden overflow-x-auto md:block">
                 <table className="w-full border-collapse text-sm">
                   <thead>
                     <tr className="bg-[#1F4E79] text-white">
@@ -265,7 +304,7 @@ export default function QuestionnaireFill() {
           />
         </Card>
 
-        <Button className="justify-self-end">Enviar respuestas</Button>
+        <Button className="w-full justify-center sm:w-auto sm:justify-self-end">Enviar respuestas</Button>
       </form>
     </main>
   );
