@@ -137,7 +137,7 @@ export default function QuestionnaireFill() {
 
   return (
     <main className="min-h-screen bg-[#EDEDED] p-2 text-[#111827] sm:p-3 lg:p-8">
-      <form onSubmit={submit} className="mx-auto grid w-full max-w-6xl gap-3 sm:gap-5">
+      <form onSubmit={submit} className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-3 sm:gap-5">
         <section className="overflow-hidden rounded-md border-2 border-[#1F4E79] bg-white">
           <div className="flex flex-col items-center justify-between gap-3 border-b border-zinc-300 p-3 sm:flex-row sm:gap-5 sm:p-5">
             <img src={limproLogo} alt="LIMPRO" className="h-9 w-auto sm:h-11" />
@@ -194,7 +194,7 @@ export default function QuestionnaireFill() {
                     type={field.type}
                     value={generalData[field.id] || ""}
                     onChange={(event) => handleGeneralChange(field.id, event.target.value)}
-                    className="h-12 rounded-lg border border-zinc-300 px-3 text-sm outline-none focus:border-[#1F4E79] focus:ring-2 focus:ring-[#1F4E79]/20"
+                    className="h-12 w-full min-w-0 rounded-lg border border-zinc-300 px-3 text-sm outline-none focus:border-[#1F4E79] focus:ring-2 focus:ring-[#1F4E79]/20"
                   />
                 )}
               </div>
@@ -206,10 +206,11 @@ export default function QuestionnaireFill() {
           <Card key={dimension} className="overflow-hidden p-0">
             <div className="bg-white">
               <div className="border-b border-zinc-200 px-4 py-3 text-center text-base font-black uppercase">{dimension}</div>
-              <div className="divide-y divide-zinc-200 md:hidden">
+              <div className="divide-y-2 divide-zinc-300 md:hidden">
                 {questions.map((question) => (
-                  <fieldset key={question.order} className="grid gap-3 p-4">
-                    <legend className="text-sm font-bold leading-relaxed">
+                  <div key={question.order} className="px-3 py-5">
+                  <fieldset className="grid min-w-0 gap-3">
+                    <legend className="mb-3 w-full text-sm font-bold leading-relaxed">
                       <span className="mr-2 inline-grid size-7 place-items-center rounded-full bg-[#EAF2F8] text-[#1F4E79]">
                         {question.order}
                       </span>
@@ -226,9 +227,8 @@ export default function QuestionnaireFill() {
                           }`}
                         >
                           <input
-                            required
                             type="radio"
-                            name={`q-${question.order}`}
+                            name={`mobile-q-${question.order}`}
                             value={option.value}
                             checked={answers[question.order] === String(option.value)}
                             onChange={(event) => setAnswers({ ...answers, [question.order]: event.target.value })}
@@ -239,6 +239,7 @@ export default function QuestionnaireFill() {
                       ))}
                     </div>
                   </fieldset>
+                  </div>
                 ))}
                 <div className="flex items-center justify-between gap-3 bg-[#1F4E79] px-4 py-3 text-sm font-bold text-white">
                   <span>Suma de puntos de la dimension</span>
@@ -266,9 +267,8 @@ export default function QuestionnaireFill() {
                         {answerOptions.map((option) => (
                           <td key={option.value} className="border border-zinc-300 px-2 py-2 text-center">
                             <input
-                              required
                               type="radio"
-                              name={`q-${question.order}`}
+                              name={`desktop-q-${question.order}`}
                               value={option.value}
                               checked={answers[question.order] === String(option.value)}
                               onChange={(event) => setAnswers({ ...answers, [question.order]: event.target.value })}
