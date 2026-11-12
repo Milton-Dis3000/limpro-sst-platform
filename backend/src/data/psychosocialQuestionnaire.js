@@ -21,8 +21,9 @@ export const psychosocialQuestionnaire = {
   ],
   datosGenerales: [
     { id: "fecha", label: "Fecha:", type: "date" },
-    { id: "provincia", label: "Provincia:", type: "text" },
-    { id: "ciudad", label: "Ciudad:", type: "text" },
+    { id: "paisEstado", label: "País o estado:", type: "text" },
+    { id: "provincia", label: "Provincia o cabecera:", type: "text" },
+    { id: "ciudad", label: "Cantón o municipio:", type: "text" },
     { id: "areaTrabajo", label: "Área de trabajo:", type: "choice", options: ["Administrativa", "Operativa"] },
     {
       id: "nivelInstruccion",
@@ -46,7 +47,7 @@ export const psychosocialQuestionnaire = {
       id: "autoIdentificacionEtnica",
       label: "Auto-identificación étnica:",
       type: "choice",
-      options: ["Indígena", "Afro -ecuatoriano:", "Mestizo/a:", "Blanco/a:", "Montubio/a:", "Otro:"]
+      options: ["Indígena", "Afro", "Mestizo/a:", "Blanco/a:", "Montubio/a:", "Otro:"]
     },
     { id: "sexo", label: "Sexo del trabajador o servidor:", type: "choice", options: ["Mujer:", "Hombre:"] }
   ],

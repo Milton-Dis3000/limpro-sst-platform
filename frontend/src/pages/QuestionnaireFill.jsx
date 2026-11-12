@@ -20,8 +20,9 @@ const DEFAULT_INSTRUCTIONS = [
 
 const DEFAULT_GENERAL_FIELDS = [
   { id: "fecha", label: "Fecha:", type: "date" },
-  { id: "provincia", label: "Provincia:", type: "text" },
-  { id: "ciudad", label: "Ciudad:", type: "text" },
+  { id: "paisEstado", label: "País o estado:", type: "text" },
+  { id: "provincia", label: "Provincia o cabecera:", type: "text" },
+  { id: "ciudad", label: "Cantón o municipio:", type: "text" },
   { id: "areaTrabajo", label: "Area de trabajo:", type: "choice", options: ["Administrativa", "Operativa"] },
   {
     id: "nivelInstruccion",
@@ -45,7 +46,7 @@ const DEFAULT_GENERAL_FIELDS = [
     id: "autoIdentificacionEtnica",
     label: "Auto-identificacion etnica:",
     type: "choice",
-    options: ["Indigena", "Afro-ecuatoriano/a", "Mestizo/a", "Blanco/a", "Montubio/a", "Otro"]
+    options: ["Indigena", "Afro", "Mestizo/a", "Blanco/a", "Montubio/a", "Otro"]
   },
   { id: "sexo", label: "Sexo del trabajador o servidor:", type: "choice", options: ["Mujer", "Hombre"] }
 ];
