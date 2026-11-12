@@ -136,7 +136,7 @@ export default function QuestionnaireFill() {
   if (!assessment) return <main className="p-6">Cargando cuestionario...</main>;
 
   return (
-    <main className="min-h-screen w-full max-w-[100vw] bg-[#EDEDED] p-2 text-[#111827] [overflow-wrap:anywhere] sm:p-3 lg:p-8">
+    <main className="public-questionnaire min-h-screen w-full bg-[#EDEDED] p-2 text-[#111827] [overflow-wrap:anywhere] sm:p-3 lg:p-8">
       <form onSubmit={submit} className="mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-3 sm:gap-5">
         <section className="overflow-hidden rounded-md border-2 border-[#1F4E79] bg-white">
           <div className="flex flex-col items-center justify-between gap-3 border-b border-zinc-300 p-3 sm:flex-row sm:gap-5 sm:p-5">
