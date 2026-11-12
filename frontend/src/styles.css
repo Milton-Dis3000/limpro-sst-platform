@@ -8,13 +8,29 @@
 
 body {
   margin: 0;
-  min-width: 320px;
   min-height: 100vh;
   background: #F4F4F4;
 }
 
-body:has(.public-questionnaire) {
+.workspace-content {
+  overflow-wrap: anywhere;
+}
+
+.workspace-content :where(.grid > *, select, textarea, input[type="file"]) {
   min-width: 0;
+  max-width: 100%;
+}
+
+@media (width < 40rem) {
+  .workspace-content h2 {
+    font-size: 1.375rem;
+    line-height: 1.25;
+    letter-spacing: 0;
+  }
+
+  .workspace-content > .grid {
+    row-gap: 1rem;
+  }
 }
 
 .public-questionnaire,

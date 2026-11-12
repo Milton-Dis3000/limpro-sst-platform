@@ -78,7 +78,7 @@ export default function AppLayout() {
       </aside>
 
       <main className="min-w-0 pb-20 lg:pb-0 lg:pl-64">
-        <header className="sticky top-0 z-10 flex min-h-20 items-center justify-between border-b border-zinc-200/80 bg-white/95 px-4 backdrop-blur lg:px-8">
+        <header className="sticky top-0 z-10 flex min-h-16 items-center justify-between gap-2 border-b border-zinc-200/80 bg-white/95 px-3 backdrop-blur sm:min-h-20 lg:px-8">
           <div>
             <p className="text-sm text-[#5A5A5A]">Espacio de trabajo</p>
             <h1 className="text-xl font-black">Evaluaciones SST</h1>
@@ -94,7 +94,7 @@ export default function AppLayout() {
           </div>
         </header>
 
-        <div className="mx-auto min-w-0 max-w-[1280px] p-3 sm:p-4 lg:p-8">
+        <div className="workspace-content mx-auto w-full min-w-0 max-w-[1280px] p-3 sm:p-4 lg:p-8">
           <Outlet />
         </div>
       </main>

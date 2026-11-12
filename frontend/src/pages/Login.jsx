@@ -28,10 +28,10 @@ export default function Login() {
   };
 
   return (
-    <main className="grid min-h-screen w-full min-w-0 place-items-center bg-[#F3F4F6] p-3 sm:p-4">
-      <form onSubmit={submit} className="w-full min-w-0 max-w-md rounded-2xl border border-zinc-200 bg-white p-5 shadow-xl shadow-zinc-200/70 sm:p-8">
-        <div className="mb-6 grid min-w-0 gap-4 sm:mb-8">
-          <img src={limproLogo} alt="LIMPRO" className="mx-auto h-9 max-w-full object-contain sm:h-10" />
+    <main className="flex min-h-screen w-full min-w-0 items-center justify-center bg-[#F3F4F6] p-4">
+      <form onSubmit={submit} className="w-full min-w-0 max-w-md rounded-2xl border border-zinc-200 bg-white p-4 shadow-xl shadow-zinc-200/70 sm:p-8">
+        <div className="mb-5 grid min-w-0 gap-3 sm:mb-8 sm:gap-4">
+          <img src={limproLogo} alt="LIMPRO" className="mx-auto h-8 max-w-full object-contain sm:h-10" />
           <div className="flex min-w-0 items-center gap-3">
             <div className="grid size-11 shrink-0 place-items-center rounded-xl bg-orange-50 text-[#C2410C] sm:size-12">
               <ShieldCheck size={28} />
