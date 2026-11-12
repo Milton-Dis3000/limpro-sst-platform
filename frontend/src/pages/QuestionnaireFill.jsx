@@ -136,8 +136,8 @@ export default function QuestionnaireFill() {
   if (!assessment) return <main className="p-6">Cargando cuestionario...</main>;
 
   return (
-    <main className="min-h-screen bg-[#EDEDED] p-2 text-[#111827] sm:p-3 lg:p-8">
-      <form onSubmit={submit} className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-3 sm:gap-5">
+    <main className="min-h-screen min-w-0 overflow-x-hidden bg-[#EDEDED] p-2 text-[#111827] sm:p-3 lg:p-8">
+      <form onSubmit={submit} className="mx-auto grid w-full min-w-0 max-w-6xl grid-cols-[minmax(0,1fr)] gap-3 sm:gap-5">
         <section className="overflow-hidden rounded-md border-2 border-[#1F4E79] bg-white">
           <div className="flex flex-col items-center justify-between gap-3 border-b border-zinc-300 p-3 sm:flex-row sm:gap-5 sm:p-5">
             <img src={limproLogo} alt="LIMPRO" className="h-9 w-auto sm:h-11" />
@@ -164,7 +164,7 @@ export default function QuestionnaireFill() {
           </div>
         </section>
 
-        <Card className="overflow-hidden p-0">
+        <Card className="min-w-0 overflow-hidden p-0">
           <div className="bg-[#1F4E79] px-4 py-3 text-sm font-black uppercase text-white">Datos generales</div>
           <div className="grid gap-4 p-4 md:grid-cols-2 xl:grid-cols-3">
             {generalFields.map((field) => (
@@ -203,7 +203,7 @@ export default function QuestionnaireFill() {
         </Card>
 
         {groupedEntries.map(([dimension, questions]) => (
-          <Card key={dimension} className="overflow-hidden p-0">
+          <Card key={dimension} className="min-w-0 overflow-hidden p-0">
             <div className="bg-white">
               <div className="border-b border-zinc-200 px-4 py-3 text-center text-base font-black uppercase">{dimension}</div>
               <div className="divide-y-2 divide-zinc-300 md:hidden">
@@ -246,7 +246,7 @@ export default function QuestionnaireFill() {
                   <span className="shrink-0">{dimensionTotals[dimension] || 0} puntos</span>
                 </div>
               </div>
-              <div className="hidden overflow-x-auto md:block">
+              <div className="hidden min-w-0 overflow-x-auto md:block">
                 <table className="w-full border-collapse text-sm">
                   <thead>
                     <tr className="bg-[#1F4E79] text-white">
