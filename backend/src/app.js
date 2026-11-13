@@ -9,6 +9,7 @@ import evaluatorRoutes from "./routes/evaluator.routes.js";
 import assessmentRoutes from "./routes/assessment.routes.js";
 import questionnaireRoutes from "./routes/questionnaire.routes.js";
 import reportRoutes from "./routes/report.routes.js";
+import adminRoutes from "./routes/admin.routes.js";
 import { errorHandler, notFound } from "./middlewares/error.middleware.js";
 
 const app = express();
@@ -21,6 +22,7 @@ app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 
 app.get("/health", (_req, res) => res.json({ ok: true, service: "LIMPRO API" }));
 app.use("/api/auth", authRoutes);
+app.use("/api/admin", adminRoutes);
 app.use("/api/companies", companyRoutes);
 app.use("/api/evaluator", evaluatorRoutes);
 app.use("/api/assessments", assessmentRoutes);

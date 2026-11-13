@@ -7,10 +7,14 @@ import { uploadImageBuffer } from "../services/cloudinary.service.js";
 
 const companyAccessFilter = (req) =>
   req.user.rol === "admin" ? { _id: req.params.id } : { _id: req.params.id, propietario: req.user._id };
+const companyReadFilter = (req) =>
+  req.user.rol === "admin" || req.user.rol === "consultor"
+    ? { _id: req.params.id }
+    : { _id: req.params.id, propietario: req.user._id };
 
 export const listCompanies = async (req, res, next) => {
   try {
-    const filter = req.user.rol === "admin" ? {} : { propietario: req.user._id };
+    const filter = req.user.rol === "admin" || req.user.rol === "consultor" ? {} : { propietario: req.user._id };
     const companies = await Company.find(filter).sort({ createdAt: -1 });
     res.json(companies);
   } catch (error) {
@@ -35,7 +39,7 @@ export const createCompany = async (req, res, next) => {
 
 export const getCompany = async (req, res, next) => {
   try {
-    const company = await Company.findById(req.params.id);
+    const company = await Company.findOne(companyReadFilter(req));
     if (!company) {
       const error = new Error("Empresa no encontrada.");
       error.statusCode = 404;
@@ -49,7 +53,7 @@ export const getCompany = async (req, res, next) => {
 
 export const updateCompany = async (req, res, next) => {
   try {
-    const company = await Company.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const company = await Company.findOneAndUpdate(companyAccessFilter(req), req.body, { new: true });
     res.json(company);
   } catch (error) {
     next(error);
@@ -108,7 +112,7 @@ export const deleteCompany = async (req, res, next) => {
 export const uploadCompanyLogo = async (req, res, next) => {
   try {
     const logo = await uploadImageBuffer(req.file, "limpro/companies");
-    const company = await Company.findByIdAndUpdate(req.params.id, { logo }, { new: true });
+    const company = await Company.findOneAndUpdate(companyAccessFilter(req), { logo }, { new: true });
     res.json(company);
   } catch (error) {
     next(error);

@@ -20,9 +20,14 @@ const withDossierDates = (payload = {}) => {
   return { ...payload, expediente };
 };
 
+const assessmentAccessFilter = (req) => req.user.rol === "admin"
+  ? { _id: req.params.id }
+  : { _id: req.params.id, evaluador: req.user._id };
+
 export const listAssessments = async (req, res, next) => {
   try {
-    const assessments = await Assessment.find({ evaluador: req.user._id })
+    const filter = req.user.rol === "admin" ? {} : { evaluador: req.user._id };
+    const assessments = await Assessment.find(filter)
       .populate("empresa", "nombreComercial razonSocial")
       .populate("questionnaire", "nombre modulo version")
       .sort({ createdAt: -1 });
@@ -64,7 +69,7 @@ export const createAssessment = async (req, res, next) => {
 
 export const getAssessment = async (req, res, next) => {
   try {
-    const assessment = await Assessment.findById(req.params.id)
+    const assessment = await Assessment.findOne(assessmentAccessFilter(req))
       .populate("empresa")
       .populate("questionnaire")
       .populate("evaluador", "nombre email");
@@ -83,7 +88,7 @@ export const getAssessment = async (req, res, next) => {
 
 export const updateAssessment = async (req, res, next) => {
   try {
-    const assessment = await Assessment.findByIdAndUpdate(req.params.id, withDossierDates(req.body), { new: true })
+    const assessment = await Assessment.findOneAndUpdate(assessmentAccessFilter(req), withDossierDates(req.body), { new: true })
       .populate("empresa")
       .populate("questionnaire")
       .populate("evaluador", "nombre email");
@@ -95,11 +100,7 @@ export const updateAssessment = async (req, res, next) => {
 
 export const deleteAssessment = async (req, res, next) => {
   try {
-    const accessFilter =
-      req.user.rol === "admin"
-        ? { _id: req.params.id }
-        : { _id: req.params.id, evaluador: req.user._id };
-    const assessment = await Assessment.findOne(accessFilter);
+    const assessment = await Assessment.findOne(assessmentAccessFilter(req));
     if (!assessment) {
       const error = new Error("Evaluacion no encontrada o no tienes permiso para eliminarla.");
       error.statusCode = 404;
@@ -144,7 +145,7 @@ export const uploadAssessmentEvidence = async (req, res, next) => {
       throw error;
     }
 
-    const assessment = await Assessment.findOne({ _id: req.params.id, evaluador: req.user._id });
+    const assessment = await Assessment.findOne(assessmentAccessFilter(req));
     if (!assessment) {
       const error = new Error("Evaluacion no encontrada.");
       error.statusCode = 404;
@@ -235,7 +236,12 @@ export const submitPublicResponse = async (req, res, next) => {
 
 export const recalculateAssessment = async (req, res, next) => {
   try {
-    const assessment = await Assessment.findById(req.params.id).populate("questionnaire");
+    const assessment = await Assessment.findOne(assessmentAccessFilter(req)).populate("questionnaire");
+    if (!assessment) {
+      const error = new Error("Evaluacion no encontrada o no tienes permiso para verla.");
+      error.statusCode = 404;
+      throw error;
+    }
     const responses = await Response.find({ evaluacion: assessment._id });
     const questionnaire = resolveQuestionnaireSource(assessment.questionnaire);
     assessment.totalParticipantes = responses.length;

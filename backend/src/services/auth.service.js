@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import AdminBootstrap from "../models/AdminBootstrap.js";
 import RefreshToken from "../models/RefreshToken.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/generateTokens.js";
 
@@ -35,14 +36,73 @@ export const registerUser = async (payload) => {
     throw error;
   }
 
-  const user = await User.create({ ...payload, email });
+  const user = await User.create({ ...payload, email, rol: "empresa" });
   const tokens = await issueTokens(user);
   return { user, tokens };
 };
 
+export const bootstrapAdmin = async ({ email: rawEmail, password, setupKey }) => {
+  const configuredKey = process.env.MASTER_ADMIN_SETUP_KEY || "";
+  const suppliedKey = typeof setupKey === "string" ? setupKey : "";
+  const suppliedBuffer = Buffer.from(suppliedKey);
+  const configuredBuffer = Buffer.from(configuredKey);
+  const keyMatches = configuredBuffer.length > 0 && suppliedBuffer.length === configuredBuffer.length &&
+    crypto.timingSafeEqual(suppliedBuffer, configuredBuffer);
+
+  if (!keyMatches) {
+    const error = new Error("La clave de activación no es válida.");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  const email = normalizeEmail(rawEmail);
+  const user = await User.findOne({ email }).select("+password");
+  if (!user || user.estado !== "activo" || !(await user.comparePassword(password || ""))) {
+    const error = new Error("No se pudo verificar la cuenta. Revisa el correo y la contraseña.");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  if (await User.exists({ rol: "admin" })) {
+    const error = new Error("El administrador maestro ya fue activado.");
+    error.statusCode = 409;
+    throw error;
+  }
+
+  try {
+    await AdminBootstrap.create({ _id: "primary-admin", user: user._id });
+  } catch (cause) {
+    if (cause.code === 11000) {
+      const error = new Error("La activación del administrador maestro ya fue utilizada.");
+      error.statusCode = 409;
+      throw error;
+    }
+    throw cause;
+  }
+
+  try {
+    user.rol = "admin";
+    await user.save();
+  } catch (error) {
+    await AdminBootstrap.deleteOne({ _id: "primary-admin", user: user._id });
+    throw error;
+  }
+  user.password = undefined;
+  return { user, tokens: await issueTokens(user) };
+};
+
+export const isAdminBootstrapAvailable = async () => {
+  if (!process.env.MASTER_ADMIN_SETUP_KEY) return false;
+  const [admin, claimed] = await Promise.all([
+    User.exists({ rol: "admin" }),
+    AdminBootstrap.exists({ _id: "primary-admin" })
+  ]);
+  return !admin && !claimed;
+};
+
 export const loginUser = async ({ email, password }) => {
   const user = await User.findOne({ email: normalizeEmail(email) }).select("+password");
-  if (!user || !(await user.comparePassword(password))) {
+  if (!user || user.estado !== "activo" || !(await user.comparePassword(password))) {
     const error = new Error("Credenciales inválidas.");
     error.statusCode = 401;
     throw error;
@@ -65,7 +125,7 @@ export const refreshAccessToken = async (refreshToken) => {
   }
 
   const user = await User.findById(decoded.sub);
-  if (!user) {
+  if (!user || user.estado !== "activo") {
     const error = new Error("Usuario no encontrado.");
     error.statusCode = 401;
     throw error;

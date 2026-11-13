@@ -1,5 +1,6 @@
 import api from "./axios.js";
 
+export const listReports = () => api.get("/reports");
 export const downloadPdfReport = (assessmentId, payload = {}) =>
   api.post(`/reports/${assessmentId}/pdf`, payload, { responseType: "blob" });
 

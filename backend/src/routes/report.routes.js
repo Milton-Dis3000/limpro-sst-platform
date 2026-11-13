@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { generateExcelReport, generatePdfReport, generateWordReport, listReports } from "../controllers/report.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
+import { allowRoles } from "../middlewares/role.middleware.js";
 
 const router = Router();
 
-router.use(protect);
+router.use(protect, allowRoles("admin", "consultor"));
 router.get("/", listReports);
 router.post("/:assessmentId/pdf", generatePdfReport);
 router.post("/:assessmentId/excel", generateExcelReport);

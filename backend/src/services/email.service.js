@@ -19,7 +19,7 @@ export const sendWelcomeEmail = (user) =>
   sendEmail({
     to: user.email,
     subject: "Bienvenido a LIMPRO",
-    html: `<p>Hola ${user.nombre}, tu cuenta de consultor en LIMPRO está lista.</p>`
+    html: `<p>Hola ${user.nombre}, tu cuenta en LIMPRO está lista. Los permisos de evaluador los asigna el administrador.</p>`
   });
 
 export const sendQuestionnaireInvite = ({ to, companyName, url }) =>

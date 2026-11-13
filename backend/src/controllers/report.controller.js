@@ -5,12 +5,23 @@ import EvaluatorProfile from "../models/EvaluatorProfile.js";
 import { resolveQuestionnaireSource } from "../data/resolveQuestionnaire.js";
 import { buildAssessmentExcel, buildAssessmentPdf, buildAssessmentWord } from "../services/report.service.js";
 
+const findAccessibleAssessment = async (req) => {
+  const assessment = await Assessment.findOne(
+    req.user.rol === "admin"
+      ? { _id: req.params.assessmentId }
+      : { _id: req.params.assessmentId, evaluador: req.user._id }
+  ).populate("empresa").populate("questionnaire").populate("evaluador", "nombre email");
+  if (!assessment) {
+    const error = new Error("Evaluacion no encontrada o no tienes permiso para verla.");
+    error.statusCode = 404;
+    throw error;
+  }
+  return assessment;
+};
+
 export const generatePdfReport = async (req, res, next) => {
   try {
-    const assessment = await Assessment.findById(req.params.assessmentId)
-      .populate("empresa")
-      .populate("questionnaire")
-      .populate("evaluador", "nombre email");
+    const assessment = await findAccessibleAssessment(req);
     const responses = await Response.find({ evaluacion: assessment._id });
     const questionnaire = resolveQuestionnaireSource(assessment.questionnaire);
     const evaluatorProfile = await EvaluatorProfile.findOne({ usuario: assessment.evaluador?._id || assessment.evaluador });
@@ -38,10 +49,7 @@ export const generatePdfReport = async (req, res, next) => {
 
 export const generateExcelReport = async (req, res, next) => {
   try {
-    const assessment = await Assessment.findById(req.params.assessmentId)
-      .populate("empresa")
-      .populate("questionnaire")
-      .populate("evaluador", "nombre email");
+    const assessment = await findAccessibleAssessment(req);
     const responses = await Response.find({ evaluacion: assessment._id });
     const questionnaire = resolveQuestionnaireSource(assessment.questionnaire);
     const evaluatorProfile = await EvaluatorProfile.findOne({ usuario: assessment.evaluador?._id || assessment.evaluador });
@@ -57,10 +65,7 @@ export const generateExcelReport = async (req, res, next) => {
 
 export const generateWordReport = async (req, res, next) => {
   try {
-    const assessment = await Assessment.findById(req.params.assessmentId)
-      .populate("empresa")
-      .populate("questionnaire")
-      .populate("evaluador", "nombre email");
+    const assessment = await findAccessibleAssessment(req);
     const responses = await Response.find({ evaluacion: assessment._id });
     const questionnaire = resolveQuestionnaireSource(assessment.questionnaire);
     const evaluatorProfile = await EvaluatorProfile.findOne({ usuario: assessment.evaluador?._id || assessment.evaluador });
@@ -88,7 +93,8 @@ export const generateWordReport = async (req, res, next) => {
 
 export const listReports = async (req, res, next) => {
   try {
-    const reports = await Report.find({ generadoPor: req.user._id }).populate("evaluacion");
+    const filter = req.user.rol === "admin" ? {} : { generadoPor: req.user._id };
+    const reports = await Report.find(filter).populate("evaluacion");
     res.json(reports);
   } catch (error) {
     next(error);

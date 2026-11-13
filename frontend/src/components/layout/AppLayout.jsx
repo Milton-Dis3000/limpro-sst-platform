@@ -1,10 +1,10 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { BarChart3, Building2, ClipboardList, FileText, LayoutDashboard, LogOut, Settings, UserRoundCheck } from "lucide-react";
+import { BarChart3, Building2, ClipboardList, FileText, LayoutDashboard, LogOut, Settings, ShieldCheck, UserRoundCheck } from "lucide-react";
 import { FaFacebookF, FaInstagram, FaTiktok, FaYoutube } from "react-icons/fa6";
 import limproLogoWhite from "../../assets/limpro-logo-white..png";
 import { clearAuth, getAuth } from "../../store/auth.store.js";
 
-const nav = [
+const baseNav = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
   { to: "/empresas", label: "Empresas", icon: Building2 },
   { to: "/evaluaciones", label: "Evaluaciones", icon: ClipboardList },
@@ -23,6 +23,7 @@ const socials = [
 export default function AppLayout() {
   const navigate = useNavigate();
   const user = getAuth()?.user;
+  const nav = user?.rol === "admin" ? [...baseNav, { to: "/administracion", label: "Admin", icon: ShieldCheck }] : baseNav;
 
   const logout = () => {
     clearAuth();
@@ -86,7 +87,7 @@ export default function AppLayout() {
           <div className="flex items-center gap-3">
             <div className="hidden items-center gap-3 rounded-lg bg-[#F4F4F4] px-4 py-3 text-sm font-semibold sm:flex">
               <UserRoundCheck size={22} className="text-[#C2410C]" />
-              {user?.nombre || "Consultor"}
+              {user?.nombre || "Usuario"} · {user?.rol === "admin" ? "Admin maestro" : user?.rol === "consultor" ? "Evaluador" : "Empresa"}
             </div>
             <button title="Cerrar sesion" onClick={logout} className="grid h-12 w-12 place-items-center rounded-lg border border-zinc-200 bg-white text-[#5A5A5A] hover:text-[#C2410C]">
               <LogOut size={22} />
@@ -98,7 +99,7 @@ export default function AppLayout() {
           <Outlet />
         </div>
       </main>
-      <nav aria-label="Navegacion principal" className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-6 border-t border-zinc-200 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_16px_rgba(0,0,0,0.08)] backdrop-blur lg:hidden">
+      <nav aria-label="Navegacion principal" className={`fixed inset-x-0 bottom-0 z-20 grid ${user?.rol === "admin" ? "grid-cols-7" : "grid-cols-6"} border-t border-zinc-200 bg-white/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_16px_rgba(0,0,0,0.08)] backdrop-blur lg:hidden`}>
         {nav.map((item) => {
           const Icon = item.icon;
           return (

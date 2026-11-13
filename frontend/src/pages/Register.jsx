@@ -10,7 +10,7 @@ import { setAuth } from "../store/auth.store.js";
 
 export default function Register() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ nombre: "", email: "", password: "", rol: "consultor" });
+  const [form, setForm] = useState({ nombre: "", email: "", password: "" });
 
   const submit = async (event) => {
     event.preventDefault();
@@ -33,20 +33,13 @@ export default function Register() {
           </div>
           <div>
             <h1 className="text-2xl font-black text-[#2E2E2E]">Crear cuenta</h1>
-            <p className="text-sm text-[#5A5A5A]">Acceso para consultores y empresas.</p>
+            <p className="text-sm text-[#5A5A5A]">El administrador asigna los permisos después del registro.</p>
           </div>
         </div>
         <div className="mt-6 grid gap-4">
           <Input label="Nombre" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} required />
           <Input label="Email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
           <Input label="Contrasena" type="password" minLength={8} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required />
-          <label className="grid gap-1.5 text-sm font-bold">
-            Rol
-            <select className="h-12 rounded-lg border border-zinc-200 bg-white px-4" value={form.rol} onChange={(e) => setForm({ ...form, rol: e.target.value })}>
-              <option value="consultor">Consultor</option>
-              <option value="empresa">Empresa</option>
-            </select>
-          </label>
           <Button>Crear cuenta</Button>
         </div>
         <p className="mt-6 text-center text-sm text-[#5A5A5A]">

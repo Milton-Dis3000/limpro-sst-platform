@@ -11,6 +11,7 @@ import {
   uploadAssessmentEvidence
 } from "../controllers/assessment.controller.js";
 import { protect } from "../middlewares/auth.middleware.js";
+import { allowRoles } from "../middlewares/role.middleware.js";
 import { upload } from "../middlewares/upload.middleware.js";
 
 const router = Router();
@@ -18,6 +19,7 @@ const router = Router();
 router.get("/public/:token", getPublicAssessment);
 router.post("/public/:token/responses", submitPublicResponse);
 router.use(protect);
+router.use(allowRoles("admin", "consultor"));
 router.get("/", listAssessments);
 router.post("/", createAssessment);
 router.get("/:id", getAssessment);

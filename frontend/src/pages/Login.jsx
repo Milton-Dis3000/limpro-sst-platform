@@ -1,8 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
 import { ShieldCheck } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { loginRequest } from "../api/auth.api.js";
+import { adminBootstrapStatusRequest, loginRequest } from "../api/auth.api.js";
 import limproLogo from "../assets/limpro-logo.png";
 import Button from "../components/ui/Button.jsx";
 import Input from "../components/ui/Input.jsx";
@@ -12,6 +12,11 @@ export default function Login() {
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
+  const [bootstrapAvailable, setBootstrapAvailable] = useState(false);
+
+  useEffect(() => {
+    adminBootstrapStatusRequest().then(({ data }) => setBootstrapAvailable(data.available)).catch(() => {});
+  }, []);
 
   const submit = async (event) => {
     event.preventDefault();
@@ -50,6 +55,7 @@ export default function Login() {
         <p className="mt-6 text-center text-sm text-[#5A5A5A]">
           No tienes cuenta? <Link className="font-bold text-[#C2410C]" to="/registro">Registrate</Link>
         </p>
+        {bootstrapAvailable && <p className="mt-2 text-center text-xs text-zinc-500"><Link className="hover:text-[#C2410C]" to="/activar-admin">Activar primer administrador maestro</Link></p>}
       </form>
     </main>
   );

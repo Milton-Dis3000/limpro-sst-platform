@@ -26,6 +26,7 @@ Variables requeridas en Render:
 MONGODB_URI=
 JWT_ACCESS_SECRET=
 JWT_REFRESH_SECRET=
+MASTER_ADMIN_SETUP_KEY=
 ACCESS_TOKEN_EXPIRES_IN=15m
 REFRESH_TOKEN_EXPIRES_IN=7d
 CORS_ORIGIN=https://TU-FRONTEND.vercel.app
@@ -35,6 +36,8 @@ CLOUDINARY_API_SECRET=
 RESEND_API_KEY=
 EMAIL_FROM=
 ```
+
+`MASTER_ADMIN_SETUP_KEY` se usa una sola vez para activar la cuenta maestra. Genera una clave aleatoria larga, configúrala temporalmente en el servicio de Render y abre `/activar-admin` en la web. La activación también exige el correo y la contraseña de una cuenta activa ya registrada. Después de activarla, elimina `MASTER_ADMIN_SETUP_KEY` de Render; la base de datos bloquea cualquier segundo administrador maestro.
 
 Render define `PORT` automaticamente. No es necesario fijarlo.
 

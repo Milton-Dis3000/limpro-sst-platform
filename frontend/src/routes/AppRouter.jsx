@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import AppLayout from "../components/layout/AppLayout.jsx";
 import ProtectedRoute from "./ProtectedRoute.jsx";
 import Login from "../pages/Login.jsx";
@@ -12,6 +12,13 @@ import QuestionnaireFill from "../pages/QuestionnaireFill.jsx";
 import Results from "../pages/Results.jsx";
 import Reports from "../pages/Reports.jsx";
 import Settings from "../pages/Settings.jsx";
+import Admin from "../pages/Admin.jsx";
+import BootstrapAdmin from "../pages/BootstrapAdmin.jsx";
+import { getAuth } from "../store/auth.store.js";
+
+function AdminGate() {
+  return getAuth()?.user?.rol === "admin" ? <Admin /> : <Navigate to="/" replace />;
+}
 
 export default function AppRouter() {
   return (
@@ -19,6 +26,7 @@ export default function AppRouter() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/registro" element={<Register />} />
+        <Route path="/activar-admin" element={<BootstrapAdmin />} />
         <Route path="/q/:token" element={<QuestionnaireFill />} />
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
@@ -30,6 +38,7 @@ export default function AppRouter() {
             <Route path="/resultados" element={<Results />} />
             <Route path="/reportes" element={<Reports />} />
             <Route path="/configuracion" element={<Settings />} />
+            <Route path="/administracion" element={<AdminGate />} />
           </Route>
         </Route>
       </Routes>

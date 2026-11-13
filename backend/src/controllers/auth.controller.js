@@ -1,4 +1,4 @@
-import { loginUser, refreshAccessToken, registerUser, revokeRefreshToken } from "../services/auth.service.js";
+import { bootstrapAdmin, isAdminBootstrapAvailable, loginUser, refreshAccessToken, registerUser, revokeRefreshToken } from "../services/auth.service.js";
 import { sendWelcomeEmail } from "../services/email.service.js";
 
 const publicUser = (user) => ({
@@ -14,6 +14,23 @@ export const register = async (req, res, next) => {
     const { user, tokens } = await registerUser(req.body);
     await sendWelcomeEmail(user);
     res.status(201).json({ user: publicUser(user), ...tokens });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const activateMasterAdmin = async (req, res, next) => {
+  try {
+    const { user, tokens } = await bootstrapAdmin(req.body);
+    res.json({ user: publicUser(user), ...tokens });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const adminBootstrapStatus = async (_req, res, next) => {
+  try {
+    res.json({ available: await isAdminBootstrapAvailable() });
   } catch (error) {
     next(error);
   }
