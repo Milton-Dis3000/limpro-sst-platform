@@ -30,6 +30,7 @@ export const listAssessments = async (req, res, next) => {
     const assessments = await Assessment.find(filter)
       .populate("empresa", "nombreComercial razonSocial")
       .populate("questionnaire", "nombre modulo version")
+      .populate("evaluador", "nombre email")
       .sort({ createdAt: -1 });
     res.json(assessments);
   } catch (error) {

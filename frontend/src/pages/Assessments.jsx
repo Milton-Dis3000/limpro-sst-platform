@@ -119,7 +119,7 @@ export default function Assessments() {
             {assessments.map((assessment) => (
               <article key={assessment._id} className="grid min-w-0 gap-3 overflow-hidden rounded-lg border border-zinc-200 p-3 text-sm">
                 <div className="flex min-w-0 items-start justify-between gap-3">
-                  <div className="min-w-0"><h4 className="break-words font-bold">{assessment.empresa?.nombreComercial || "Sin empresa"}</h4><p className="mt-1 break-words text-xs text-zinc-600">{assessmentTypeLabels[assessment.tipo] || assessment.tipo}</p></div>
+                  <div className="min-w-0"><h4 className="break-words font-bold">{assessment.empresa?.nombreComercial || "Sin empresa"}</h4><p className="mt-1 break-words text-xs text-zinc-600">{assessmentTypeLabels[assessment.tipo] || assessment.tipo}</p><p className="mt-1 break-words text-xs text-zinc-500">Evaluador: {assessment.evaluador?.nombre || assessment.evaluador?.email || "No disponible"}</p></div>
                   <RiskBadge risk={resolveGlobalRisk(assessment)} />
                 </div>
                 <div className="flex items-center justify-between border-t border-zinc-200 pt-2 text-xs text-zinc-600"><span>{assessment.estado} · {assessment.totalParticipantes} participantes</span><div className="flex gap-2">
@@ -131,10 +131,11 @@ export default function Assessments() {
             {!assessments.length && <p className="py-6 text-center text-sm text-zinc-500">Aun no hay evaluaciones.</p>}
           </div>
           <div className="hidden overflow-x-auto md:block">
-            <table className="w-full min-w-[850px] text-left text-sm">
+            <table className="w-full min-w-[1000px] text-left text-sm">
               <thead className="bg-zinc-50 text-xs uppercase text-[#5A5A5A]">
                 <tr>
                   <th className="px-5 py-3">Empresa</th>
+                  <th>Evaluador</th>
                   <th>Tipo</th>
                   <th>Estado</th>
                   <th>Participantes</th>
@@ -146,6 +147,7 @@ export default function Assessments() {
                 {assessments.map((assessment) => (
                   <tr key={assessment._id} className="hover:bg-zinc-50">
                     <td className="px-5 py-4 font-bold">{assessment.empresa?.nombreComercial || "Sin empresa"}</td>
+                    <td><div className="font-semibold">{assessment.evaluador?.nombre || "No disponible"}</div><div className="text-xs text-zinc-500">{assessment.evaluador?.email || ""}</div></td>
                     <td>{assessmentTypeLabels[assessment.tipo] || assessment.tipo}</td>
                     <td>{assessment.estado}</td>
                     <td>{assessment.totalParticipantes}</td>
@@ -170,7 +172,7 @@ export default function Assessments() {
                   </tr>
                 ))}
                 {!assessments.length && (
-                  <tr><td colSpan="6" className="py-10 text-center text-[#5A5A5A]">Aun no hay evaluaciones.</td></tr>
+                  <tr><td colSpan="7" className="py-10 text-center text-[#5A5A5A]">Aun no hay evaluaciones.</td></tr>
                 )}
               </tbody>
             </table>
