@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import Button from "../components/ui/Button.jsx";
 import Card from "../components/ui/Card.jsx";
 import { getPublicAssessment, submitPublicResponse } from "../api/assessments.api.js";
-import limproLogo from "../assets/limpro-logo.png";
+import limproLogo from "../assets/logo-white.webp";
 
 const DEFAULT_INSTRUCTIONS = [
   "El cuestionario es anonimo es decir no se solicita informacion personal sobre el participante.",
@@ -141,7 +141,7 @@ export default function QuestionnaireFill() {
       <form onSubmit={submit} className="mx-auto flex w-full min-w-0 max-w-6xl flex-col gap-3 sm:gap-5">
         <section className="overflow-hidden rounded-md border-2 border-[#1F4E79] bg-white">
           <div className="flex flex-col items-center justify-between gap-3 border-b border-zinc-300 p-3 sm:flex-row sm:gap-5 sm:p-5">
-            <img src={limproLogo} alt="LIMPRO" className="h-9 w-auto sm:h-11" />
+            <img src={limproLogo} alt="ESLIMPRO S.A." className="h-14 w-full max-w-64 object-contain sm:h-16" />
             <div className="text-center sm:text-right">
               <p className="text-lg font-black text-[#1F4E79]">Evaluaciones SST</p>
               <p className="text-sm text-zinc-500">Seguridad, salud y bienestar laboral</p>

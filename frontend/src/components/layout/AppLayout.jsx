@@ -1,7 +1,7 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { BarChart3, Building2, ClipboardList, FileText, LayoutDashboard, LogOut, Settings, ShieldCheck, UserRoundCheck } from "lucide-react";
 import { FaFacebookF, FaInstagram, FaTiktok, FaYoutube } from "react-icons/fa6";
-import limproLogoWhite from "../../assets/limpro-logo-white..png";
+import limproLogoBlack from "../../assets/logo-black.webp";
 import { clearAuth, getAuth } from "../../store/auth.store.js";
 
 const baseNav = [
@@ -34,7 +34,7 @@ export default function AppLayout() {
     <div className="min-h-screen bg-[#F3F4F6] text-[#232323]">
       <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-black/10 bg-[#202124] text-white lg:flex lg:flex-col">
         <div className="border-b border-white/10 px-5 py-4">
-          <img src={limproLogoWhite} alt="LIMPRO" className="h-7 w-auto" />
+          <img src={limproLogoBlack} alt="LIMPRO" className="h-10 w-full object-contain object-left" />
           <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/50">Plataforma SST</p>
         </div>
 
