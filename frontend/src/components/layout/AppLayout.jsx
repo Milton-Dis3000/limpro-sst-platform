@@ -34,10 +34,10 @@ export default function AppLayout() {
     <div className="min-h-screen bg-[#F3F4F6] text-[#232323]">
       <aside className="fixed inset-y-0 left-0 hidden w-64 border-r border-black/10 bg-[#202124] text-white lg:flex lg:flex-col">
         <div className="border-b border-white/10 px-1 py-3">
-          <div className="h-20 w-full overflow-hidden">
-            <img src={limproLogoBlack} alt="LIMPRO" className="h-full w-full object-contain" />
+          <div className="h-24 w-full overflow-hidden">
+            <img src={limproLogoBlack} alt="LIMPRO" className="h-full w-full scale-110 object-contain" />
           </div>
-          <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/50">Plataforma SST</p>
+          <p className="mt-1.5 text-center text-[11px] font-semibold uppercase tracking-[0.16em] text-white/60">Plataforma SST</p>
         </div>
 
         <nav className="grid gap-2 px-4 py-6">
