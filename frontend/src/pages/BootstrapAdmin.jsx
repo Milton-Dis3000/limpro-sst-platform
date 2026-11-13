@@ -6,7 +6,7 @@ import { bootstrapAdminRequest } from "../api/auth.api.js";
 import Button from "../components/ui/Button.jsx";
 import Input from "../components/ui/Input.jsx";
 import { setAuth } from "../store/auth.store.js";
-import limproLogo from "../assets/limpro-logo.png";
+import limproLogo from "../assets/logo-white.webp";
 
 export default function BootstrapAdmin() {
   const [form, setForm] = useState({ email: "", password: "", setupKey: "" });
@@ -31,7 +31,7 @@ export default function BootstrapAdmin() {
   return (
     <main className="grid min-h-screen place-items-center bg-[#F3F4F6] p-4">
       <form onSubmit={submit} className="w-full max-w-md rounded-xl border border-zinc-200 bg-white p-5 shadow-lg sm:p-7">
-        <img src={limproLogo} alt="LIMPRO" className="mx-auto h-9 w-auto" />
+        <img src={limproLogo} alt="ESLIMPRO S.A." className="mx-auto h-24 w-full max-w-sm object-contain" />
         <div className="mt-5 flex items-center gap-3"><div className="grid size-11 shrink-0 place-items-center rounded-lg bg-orange-50 text-[#C2410C]"><ShieldCheck /></div><div><h1 className="text-xl font-black">Activar admin maestro</h1><p className="text-xs text-zinc-600">Solo se puede realizar una vez.</p></div></div>
         <div className="mt-5 grid gap-4">
           <Input label="Correo de tu cuenta existente" type="email" value={form.email} onChange={(event) => setForm({ ...form, email: event.target.value })} required />

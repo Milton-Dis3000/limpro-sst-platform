@@ -3,7 +3,7 @@ import { UserRoundCheck } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import { registerRequest } from "../api/auth.api.js";
-import limproLogo from "../assets/limpro-logo.png";
+import limproLogo from "../assets/logo-white.webp";
 import Button from "../components/ui/Button.jsx";
 import Input from "../components/ui/Input.jsx";
 import { setAuth } from "../store/auth.store.js";
@@ -26,7 +26,7 @@ export default function Register() {
   return (
     <main className="grid min-h-screen place-items-center bg-[#F3F4F6] p-4">
       <form onSubmit={submit} className="w-full max-w-lg rounded-2xl border border-zinc-200 bg-white p-8 shadow-xl shadow-zinc-200/70">
-        <img src={limproLogo} alt="LIMPRO" className="mx-auto h-10 w-auto" />
+        <img src={limproLogo} alt="ESLIMPRO S.A." className="mx-auto h-24 w-full max-w-sm object-contain" />
         <div className="mt-6 flex items-center gap-3">
           <div className="grid h-12 w-12 place-items-center rounded-xl bg-orange-50 text-[#C2410C]">
             <UserRoundCheck size={28} />
