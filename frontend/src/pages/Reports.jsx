@@ -7,10 +7,11 @@ import {
   FileText,
   FileUp,
   Circle,
+  History,
   RefreshCw,
   Save
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import toast from "react-hot-toast";
 import {
   getAssessment,
@@ -19,7 +20,7 @@ import {
   updateAssessment,
   uploadAssessmentEvidence
 } from "../api/assessments.api.js";
-import { downloadExcelReport, downloadPdfReport, downloadWordReport } from "../api/reports.api.js";
+import { downloadExcelReport, downloadPdfReport, downloadStoredReport, downloadWordReport, listReports } from "../api/reports.api.js";
 import RiskBar from "../components/charts/RiskBar.jsx";
 import Button from "../components/ui/Button.jsx";
 import Card from "../components/ui/Card.jsx";
@@ -87,6 +88,7 @@ const emptyEvidence = {
 export default function Reports() {
   const fileInputRef = useRef(null);
   const [assessments, setAssessments] = useState([]);
+  const [reportHistory, setReportHistory] = useState([]);
   const [selectedId, setSelectedId] = useState("");
   const [detail, setDetail] = useState(null);
   const [technical, setTechnical] = useState(emptyTechnical);
@@ -101,6 +103,15 @@ export default function Reports() {
     [assessments, selectedId]
   );
 
+  const refreshReportHistory = useCallback(async () => {
+    try {
+      const { data } = await listReports();
+      setReportHistory(data);
+    } catch {
+      toast.error("No se pudo cargar el historial de informes.");
+    }
+  }, []);
+
   useEffect(() => {
     listAssessments()
       .then(({ data }) => {
@@ -108,7 +119,8 @@ export default function Reports() {
         setSelectedId(data[0]?._id || "");
       })
       .catch(() => toast.error("No se pudieron cargar las evaluaciones."));
-  }, []);
+    refreshReportHistory();
+  }, [refreshReportHistory]);
 
   useEffect(() => {
     if (!selectedId) return;
@@ -243,9 +255,22 @@ export default function Reports() {
           : await downloadExcelReport(selected._id);
       const extension = type === "pdf" ? "pdf" : type === "word" ? "docx" : "xlsx";
       saveBlob(response.data, `${filenameBase}.${extension}`);
+      await refreshReportHistory();
       toast.success(`Reporte ${type.toUpperCase()} generado.`);
     } catch (error) {
       toast.error(error.response?.data?.message || "No se pudo generar el reporte.");
+    } finally {
+      setLoading("");
+    }
+  };
+
+  const downloadArchived = async (report) => {
+    setLoading(`archive-${report._id}`);
+    try {
+      const { data } = await downloadStoredReport(report._id);
+      saveBlob(data, report.archivo?.nombreArchivo || `limpro-informe.${report.formato || "bin"}`);
+    } catch (error) {
+      toast.error(error.response?.data?.message || "No se pudo descargar el informe archivado.");
     } finally {
       setLoading("");
     }
@@ -342,6 +367,45 @@ export default function Reports() {
           ))}
         </select>
       </div>
+
+      <Card className="overflow-hidden p-0">
+        <div className="flex items-center justify-between gap-3 border-b border-zinc-100 px-4 py-4 sm:px-5">
+          <div className="flex items-center gap-2"><History className="text-[#C2410C]" size={21} /><div><h3 className="font-black">Historial de informes</h3><p className="text-xs text-zinc-600">Documentos generados y guardados para descarga.</p></div></div>
+          <button type="button" title="Actualizar historial" onClick={refreshReportHistory} className="grid size-10 shrink-0 place-items-center rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50"><RefreshCw size={17} /></button>
+        </div>
+        <div className="grid gap-2 p-3 md:hidden">
+          {reportHistory.map((report) => {
+            const evaluation = report.evaluacion;
+            const archived = Boolean(report.archivo?.nombreArchivo);
+            return <article key={report._id} className="grid min-w-0 gap-2 rounded-lg border border-zinc-200 p-3">
+              <div className="flex min-w-0 items-start justify-between gap-3"><div className="min-w-0"><p className="break-words text-sm font-bold">{evaluation?.empresa?.nombreComercial || "Empresa"}</p><p className="mt-0.5 text-xs text-zinc-600">{evaluation?.tipo || "Evaluación"} · {(report.formato || "anterior").toUpperCase()}</p></div>
+                <button type="button" title={archived ? "Descargar informe" : "Archivo no disponible"} disabled={!archived || loading === `archive-${report._id}`} onClick={() => downloadArchived(report)} className="grid size-10 shrink-0 place-items-center rounded-lg border border-zinc-200 text-[#C2410C] disabled:cursor-not-allowed disabled:text-zinc-300"><Download size={18} /></button>
+              </div>
+              <div className="flex flex-wrap justify-between gap-2 border-t border-zinc-100 pt-2 text-xs text-zinc-600"><span>{new Intl.DateTimeFormat("es-EC", { dateStyle: "medium", timeStyle: "short" }).format(new Date(report.fechaEmision || report.createdAt))}</span><span>{archived ? report.archivo.nombreArchivo : "Registro antiguo, sin archivo"}</span></div>
+            </article>;
+          })}
+          {!reportHistory.length && <p className="py-6 text-center text-sm text-zinc-500">Todavía no hay informes registrados.</p>}
+        </div>
+        <div className="hidden overflow-x-auto md:block">
+          <table className="w-full min-w-[720px] text-left text-sm">
+            <thead className="bg-zinc-50 text-xs uppercase text-zinc-600"><tr><th className="px-5 py-3">Fecha</th><th>Empresa / evaluación</th><th>Formato</th><th>Generado por</th><th>Archivo</th><th className="px-5 text-right">Descarga</th></tr></thead>
+            <tbody className="divide-y divide-zinc-100">
+              {reportHistory.map((report) => {
+                const evaluation = report.evaluacion;
+                const archived = Boolean(report.archivo?.nombreArchivo);
+                return <tr key={report._id}>
+                  <td className="whitespace-nowrap px-5 py-3 text-xs">{new Intl.DateTimeFormat("es-EC", { dateStyle: "medium", timeStyle: "short" }).format(new Date(report.fechaEmision || report.createdAt))}</td>
+                  <td><p className="font-bold">{evaluation?.empresa?.nombreComercial || "Empresa"}</p><p className="text-xs text-zinc-600">{evaluation?.tipo || "Evaluación"}</p></td>
+                  <td>{(report.formato || "Anterior").toUpperCase()}</td><td>{report.generadoPor?.nombre || "Usuario"}</td>
+                  <td className="max-w-56 truncate text-xs text-zinc-600">{archived ? report.archivo.nombreArchivo : "Registro antiguo, sin archivo"}</td>
+                  <td className="px-5 text-right"><button type="button" title={archived ? "Descargar informe" : "Archivo no disponible"} disabled={!archived || loading === `archive-${report._id}`} onClick={() => downloadArchived(report)} className="inline-grid size-10 place-items-center rounded-lg border border-zinc-200 text-[#C2410C] disabled:cursor-not-allowed disabled:text-zinc-300"><Download size={18} /></button></td>
+                </tr>;
+              })}
+              {!reportHistory.length && <tr><td colSpan="6" className="py-8 text-center text-zinc-500">Todavía no hay informes registrados.</td></tr>}
+            </tbody>
+          </table>
+        </div>
+      </Card>
 
       {!selected && <Card>No hay evaluaciones disponibles para generar reportes.</Card>}
 

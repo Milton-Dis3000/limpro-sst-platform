@@ -15,6 +15,13 @@ const reportSchema = new mongoose.Schema(
       url: String,
       publicId: String
     },
+    formato: { type: String, enum: ["pdf", "docx", "xlsx"] },
+    archivo: {
+      datos: Buffer,
+      nombreArchivo: String,
+      mimeType: String,
+      tamaño: Number
+    },
     version: { type: Number, default: 1 },
     firmaIncluida: { type: Boolean, default: false },
     fechaEmision: { type: Date, default: Date.now },
@@ -22,5 +29,8 @@ const reportSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+reportSchema.index({ generadoPor: 1, fechaEmision: -1 });
+reportSchema.index({ evaluacion: 1, fechaEmision: -1 });
 
 export default mongoose.model("Report", reportSchema);
